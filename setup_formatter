@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOOK=.git/hooks/pre-commit
+HOOK=.git/hooks/pre-push
 
 # check if script is already there
 if [ -e $HOOK ]; then
