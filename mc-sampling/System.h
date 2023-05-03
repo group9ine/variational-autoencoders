@@ -6,7 +6,7 @@
 
 class System {
 public:
-    System(int _N, double _gamma, double _dr); // constructor
+    System(int num_part, double pot_param); // constructor
 
     // assignment stuff
     System(const System& x) = delete;
@@ -14,8 +14,8 @@ public:
 
     ~System(); // destructor
 
-    void init_config(double radius, double height, double temp);
-    void evolve(int num_steps, std::FILE* out_file);
+    void init_config(double radius, double temp);
+    void evolve(int num_steps, double max_disp, std::FILE* out_file);
 
 private:
     int N;
@@ -36,6 +36,6 @@ private:
     double potential(); // specify the kicked particle
 
     void print_pos(std::FILE* file) const; // print out positions
-}
+};
 
 #endif

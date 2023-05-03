@@ -8,11 +8,11 @@
  * PUBLIC
  */
 
-System::System(int _N, double _gamma, double _dr)
-    : N(_N), gamma(_gamma), dr(_dr),
+System::System(int num_part, double pot_param)
+    : N(num_part), gamma(pot_param),
       // set a seed using clock
       gen{static_cast<std::uint32_t>(
-          std::high_resolution_clock::now().time_since_epoch().count())} {
+          std::chrono::high_resolution_clock::now().time_since_epoch().count())} {
     for (int i = 0; i < 3; ++i)
         x[i] = new double[N];
 }
@@ -22,7 +22,7 @@ System::~System() {
         delete[] x[i];
 }
 
-void System::init_config(double radius, double height, double temp) {
+void System::init_config(double radius, double temp) {
     // set private variables
     R = radius;
     T = temp;
@@ -30,7 +30,6 @@ void System::init_config(double radius, double height, double temp) {
     // random coordinate generators r = radius, t = angle, z = height
     std::uniform_real_distribution<double> r(0, R);
     std::uniform_real_distribution<double> t(0, 2 * M_PI);
-    std::uniform_real_distribution<double> z(0, 2 * height);
 
     double rho, theta;
     for (int i = 0; i < N; ++i) {
@@ -39,11 +38,13 @@ void System::init_config(double radius, double height, double temp) {
         theta = t(gen);
         x[0][i] = rho * cos(theta);
         x[1][i] = rho * sin(theta);
-        x[2][i] = z(gen);
+        x[2][i] = 2 * r(gen); // height = 2 * radius
     }
 }
 
-void System::evolve(int num_steps, std::FILE* out_file) {
+void System::evolve(int num_steps, double max_disp, std::FILE* out_file) {
+    dr = max_disp;
+
     for (int t = 1; t <= num_steps; ++t)
         step();
 
@@ -102,9 +103,9 @@ double System::potential() {
     // distance between two atoms
     double r[3];
     // sq. mod. of r and 1/r^6
-    double r2, 1r6;
+    double r2, sr6;
 
-    pot = 0.0;
+    double pot = 0.0;
     for (int i = 0; i < (N - 1); ++i) {
         // add gravitational part
         pot += gamma * x[2][i];
@@ -117,8 +118,8 @@ double System::potential() {
 
             // if radius less than cut, add to U
             if (r2 < r_cut2) {
-                1r6 = 1.0 / (r2 * r2 * r2);
-                pot += 4 * (1r6 * 1r6 - 1r6)
+                sr6 = 1.0 / (r2 * r2 * r2);
+                pot += 4 * (sr6 * sr6 - sr6);
             }
         }
     }
@@ -126,16 +127,16 @@ double System::potential() {
     // add last particle's gravitational pot
     pot += gamma * x[2][N - 1];
 
-    return pot
+    return pot;
 }
 
-void print_pos(std::FILE* file) const {
+void System::print_pos(std::FILE* file) const {
     char buf[CHUNK_SIZE + 64]; // 4kb + ~ one line
 
     int buf_cnt = 0;
     for (int i = 0; i < N; ++i) {
-        buf_cnt += std::sprintf(&buf[buf_cnt], "%d %d %d\n",
-                                x[0][i], x[1][i], x[2][i]);
+        buf_cnt += std::sprintf(&buf[buf_cnt], "%f %f %f\n", x[0][i],
+                                x[1][i], x[2][i]);
 
         // if chunk is big enough, write it
         if (buf_cnt >= CHUNK_SIZE) {

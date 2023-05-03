@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -O3
+CXXFLAGS = -Wall -Wextra -pedantic-errors -O3
 
 main: main.o System.o
 	${CXX} ${CXXFLAGS} main.o System.o -o main
