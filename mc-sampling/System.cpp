@@ -2,6 +2,8 @@
 #include <chrono>
 #include <cmath>
 
+#define CHUNK_SIZE 4096
+
 /*
  * PUBLIC
  */
@@ -41,7 +43,7 @@ void System::init_config(double radius, double height, double temp) {
     }
 }
 
-void System::evolve(int num_steps, std::ofstream& out_file) {
+void System::evolve(int num_steps, std::FILE* out_file) {
     for (int t = 1; t <= num_steps; ++t)
         step();
 
@@ -127,6 +129,26 @@ double System::potential() {
     return pot
 }
 
-void print_pos(std::ofstream& file) const {
-    // TODO
+void print_pos(std::FILE* file) const {
+    char buf[CHUNK_SIZE + 64]; // 4kb + ~ one line
+
+    int buf_cnt = 0;
+    for (int i = 0; i < N; ++i) {
+        buf_cnt += std::sprintf(&buf[buf_cnt], "%d %d %d\n",
+                                x[0][i], x[1][i], x[2][i]);
+
+        // if chunk is big enough, write it
+        if (buf_cnt >= CHUNK_SIZE) {
+            // buf = array to write
+            // buf_cnt = size of array
+            // 1 = number of objects to be written
+            std::fwrite(buf, buf_cnt, 1, file);
+            buf_cnt = 0;
+        }
+    }
+
+    // write remainder
+    if (buf_cnt > 0) {
+        std::fwrite(buf, buf_cnt, 1, file);
+    }
 }

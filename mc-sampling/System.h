@@ -15,7 +15,7 @@ public:
     ~System(); // destructor
 
     void init_config(double radius, double height, double temp);
-    void evolve(int num_steps, std::ofstream& out_file);
+    void evolve(int num_steps, std::FILE* out_file);
 
 private:
     int N;
@@ -35,7 +35,7 @@ private:
     bool kick(int i_k); // kick particle at index i_k
     double potential(); // specify the kicked particle
 
-    void print_pos(std::ofstream& file) const; // print out positions
+    void print_pos(std::FILE* file) const; // print out positions
 }
 
 #endif
