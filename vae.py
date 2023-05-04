@@ -63,7 +63,7 @@ class VAE(keras.Model):
             reconstruction = self.decoder(z)
             reconstruction_loss = tf.reduce_mean(keras.losses.mean_squared_error(data, reconstruction))
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
-            kl_loss = tf.reduce_mean(kl_loss)
+            kl_loss = tf.reduce_mean(kl_loss1)
             total_loss = reconstruction_loss + l*kl_loss
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
@@ -82,7 +82,11 @@ if __name__=="__main__":
     with open(argv[1]) as f:
         data = [[float(i.strip()) for i in s.split(" ") if i!=""] for s in f.read().split("\n") if s!=""]
     # print(len(data), [len(data[i]) for i in range(len(data))])
+    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint("./checkpoints", save_best_only=True)
+    
     vae = VAE(encoder, decoder)
     vae.compile(optimizer=keras.optimizers.Adam())
-    vae.fit(data, epochs=30, batch_size=128)
-
+    vae.fit(data, epochs=30, batch_size=128, callbacks=[model_checkpoint_callback])
+    vae.load_weights("./checkpoints")
+    vae.save("./model_info/")
+    # retrieve with vae=keras.models.load_model()
