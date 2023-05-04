@@ -4,9 +4,9 @@
 #include <string>
 
 int main(int argc, const char* argv[]) {
-    if (argc != 8) {
+    if (argc != 7) {
         std::cerr << "Usage: ./main [output file prefix] "
-                  << "[N] [gamma] [R] [T] [Nt] [dr]\n";
+                  << "[N] [R] [T] [Nt] [dr]\n";
         return -1;
     }
 
@@ -17,15 +17,14 @@ int main(int argc, const char* argv[]) {
     std::FILE* ene_file
         = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "w");
     int N = std::atoi(argv[2]);
-    double gamma = std::atof(argv[3]);
-    double radius = std::atof(argv[4]);
-    double temp = std::atof(argv[5]);
-    int num_steps = std::atoi(argv[6]);
-    double dr = std::atoi(argv[7]);
+    double box_side = std::atof(argv[3]);
+    double temp = std::atof(argv[4]);
+    int num_steps = std::atoi(argv[5]);
+    double dr = std::atoi(argv[6]);
 
     // start system and evolve
-    System sys(N, gamma);
-    sys.init_config(radius, temp);
+    System sys(N);
+    sys.init_config(box_side, temp);
     sys.evolve(num_steps, dr, pos_file, ene_file, true);
 
     // close out files

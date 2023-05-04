@@ -8,39 +8,29 @@
  * PUBLIC
  */
 
-System::System(int num_part, double pot_param)
-    : N(num_part), gamma(pot_param),
-      // set a seed using clock
-      gen{static_cast<std::uint32_t>(
-          std::chrono::high_resolution_clock::now()
-              .time_since_epoch()
-              .count())} {
-    for (int i = 0; i < 3; ++i)
+System::System(int num_part)
+    : N(num_part), gen(rd()), runif(std::uniform_real_distribution<double>(0, 1)) {
+    for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
+    }
 }
 
 System::~System() {
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; ++i) {
         delete[] x[i];
+    }
 }
 
-void System::init_config(double radius, double temp) {
+void System::init_config(double side, double temp) {
     // set private variables
-    R = radius;
+    L = side;
     T = temp;
 
-    // random coordinate generators r = radius, t = angle, z = height
-    std::uniform_real_distribution<double> r(0, R);
-    std::uniform_real_distribution<double> t(0, 2 * M_PI);
-
-    double rho, theta;
-    for (int i = 0; i < N; ++i) {
-        // x = r * cos(t), y = r * sin(t), z = z
-        rho = r(gen);
-        theta = t(gen);
-        x[0][i] = rho * cos(theta);
-        x[1][i] = rho * sin(theta);
-        x[2][i] = 2 * r(gen); // height = 2 * radius
+    // set random initial positions
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < N; ++j) {
+            x[i][j] = L * runif(gen); // initialize in (0, L)
+        }
     }
 }
 
@@ -48,15 +38,13 @@ void System::evolve(int num_steps, double max_disp, std::FILE* pos_file,
                     std::FILE* ene_file, bool print_energy) {
     dr = max_disp;
 
-    print_pos(pos_file);
-
     for (int t = 0; t < num_steps; ++t) {
         step();
         if (print_energy)
             print_ene(ene_file);
     }
 
-    //print_pos(pos_file);
+    print_pos(pos_file);
 }
 
 /*
@@ -64,18 +52,19 @@ void System::evolve(int num_steps, double max_disp, std::FILE* pos_file,
  */
 
 void System::step() {
-    std::uniform_real_distribution<double> runif(0, 1);
     for (int i = 0; i < N; ++i) {
         // calculate potential before flip
         U = potential();
         // store current position
-        for (int k = 0; k < 3; ++k)
-            x_old[k] = x[k][i];
+        for (int j = 0; j < 3; ++j) {
+            x_old[j] = x[j][i];
+        }
         // kick the current particle
         // if kick fails, restore the position and continue
         if (!kick(i)) {
-            for (int k = 0; k < 3; ++k)
-                x[k][i] = x_old[k];
+            for (int j = 0; j < 3; ++j) {
+                x[j][i] = x_old[j];
+            }
             continue;
         }
         // potential difference
@@ -85,22 +74,23 @@ void System::step() {
         // otherwise, restore previous position with
         // prob = boltzmann factor
         if (dU > 0 && runif(gen) > exp(-dU / T)) {
-            for (int k = 0; k < 3; ++k)
-                x[k][i] = x_old[k];
+            for (int j = 0; j < 3; ++j) {
+                x[j][i] = x_old[j];
+            }
         }
     }
 }
 
 bool System::kick(int i_k) {
-    std::uniform_real_distribution<double> d(0, dr);
-    for (int i = 0; i < 3; ++i)
-        x[i][i_k] += 2 * d(gen) - 1; // btw -1 and 1
+    for (int i = 0; i < 3; ++i) {
+        x[i][i_k] += dr * (2 * runif(gen) - 1); // btw -dr and +dr
+        if (x[i][i_k] < 0) {
+            return false;
+        } else if (i < 2 && x[i][i_k] > L) {
+            return false;
+        }
+    }
 
-    // check if still inside the box
-    // otherwise return false (failed kick)
-    if ((x[2][i_k] < 0)
-        || (x[0][i_k] * x[0][i_k] + x[1][i_k] * x[1][i_k] > R * R))
-        return false;
     return true;
 }
 
@@ -159,7 +149,7 @@ void System::print_pos(std::FILE* file) const {
 }
 
 void System::print_ene(std::FILE* file) const {
-    char buf[12];
+    char buf[64];
     int size = std::sprintf(&buf[0], "%f ", U);
     std::fwrite(buf, size, 1, file);
 }

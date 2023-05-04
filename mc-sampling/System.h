@@ -6,7 +6,7 @@
 
 class System {
 public:
-    System(int num_part, double pot_param); // constructor
+    System(int num_part); // constructor
 
     // assignment stuff
     System(const System& x) = delete;
@@ -20,18 +20,21 @@ public:
 
 private:
     int N;
-    double gamma;    // mu * g * sigma / epsilon (adimensional)
-    double T;        // temperature
-    double R;        // box radius
-    double* x[3];    // positions array
-    double x_old[3]; // array to store old position of kicked particle
-    double dr;       // (maximum) random displacement
+    double gamma = 1e-13; // mu * g * sigma / epsilon (adimensional)
+    double T;             // temperature
+    double L;             // box side
+    double* x[3];         // positions array
+    double x_old[3];      // array to store old position of kicked particle
+    double dr;            // (maximum) random displacement
     double U, dU;
 
     double r_cut = 3.0; // cutoff radius
     double r_cut2 = r_cut * r_cut;
 
-    std::mt19937 gen; // random generator
+    // random uniform generator
+    std::random_device rd;
+    std::mt19937 gen;
+    std::uniform_real_distribution<double> runif;
 
     void step();        // function for single MC step
     bool kick(int i_k); // kick particle at index i_k
