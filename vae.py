@@ -17,7 +17,7 @@ class Sampling(layers.Layer):
 
 
 latent_dim = 2
-l=0
+l = 0
 
 encoder_inputs = keras.Input(shape=(60,))
 x = layers.Dense(45, activation="relu")(encoder_inputs)
@@ -35,8 +35,7 @@ x = layers.Dense(30, activation="relu")(x)
 x = layers.Dense(45, activation="relu")(x)
 decoder_outputs = layers.Dense(60, activation="sigmoid")(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
-decoder.summary()
-
+#decoder.summary()
 
 
 class VAE(keras.Model):
@@ -64,7 +63,7 @@ class VAE(keras.Model):
             reconstruction = self.decoder(z)
             reconstruction_loss = tf.reduce_mean(
                 tf.reduce_sum(
-                    keras.losses.binary_crossentropy(data, reconstruction), axis=(1, 2)
+                    keras.losses.mean_squared_error(data, reconstruction), axis=(1, 2)
                 )
             )
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
@@ -81,12 +80,14 @@ class VAE(keras.Model):
             "kl_loss": self.kl_loss_tracker.result(),
         }
 
-
-(x_train, _), (x_test, _) = keras.datasets.mnist.load_data()
-mnist_digits = np.concatenate([x_train, x_test], axis=0)
-mnist_digits = np.expand_dims(mnist_digits, -1).astype("float32") / 255
-
-vae = VAE(encoder, decoder)
-vae.compile(optimizer=keras.optimizers.Adam())
-vae.fit(mnist_digits, epochs=30, batch_size=128)
+if __name__=="__main__":
+    from sys import argv
+    data = []
+    
+    with open(argv[1]) as f:
+        data = [[float(i.strip()) for i in s.split(" ")] for s in f.read().split("\n")]
+    
+    vae = VAE(encoder, decoder)
+    vae.compile(optimizer=keras.optimizers.Adam())
+    vae.fit(data, epochs=30, batch_size=128)
 
