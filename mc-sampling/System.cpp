@@ -12,7 +12,9 @@ System::System(int num_part, double pot_param)
     : N(num_part), gamma(pot_param),
       // set a seed using clock
       gen{static_cast<std::uint32_t>(
-          std::chrono::high_resolution_clock::now().time_since_epoch().count())} {
+          std::chrono::high_resolution_clock::now()
+              .time_since_epoch()
+              .count())} {
     for (int i = 0; i < 3; ++i)
         x[i] = new double[N];
 }
@@ -42,13 +44,17 @@ void System::init_config(double radius, double temp) {
     }
 }
 
-void System::evolve(int num_steps, double max_disp, std::FILE* out_file) {
+void System::evolve(int num_steps, double max_disp, std::FILE* pos_file,
+                    std::FILE* ene_file, bool print_energy) {
     dr = max_disp;
 
-    for (int t = 1; t <= num_steps; ++t)
+    for (int t = 1; t <= num_steps; ++t) {
         step();
+        if (print_energy)
+            print_ene(ene_file);
+    }
 
-    print_pos(out_file);
+    print_pos(pos_file);
 }
 
 /*
@@ -56,7 +62,6 @@ void System::evolve(int num_steps, double max_disp, std::FILE* out_file) {
  */
 
 void System::step() {
-    double U, dU;
     std::uniform_real_distribution<double> runif(0, 1);
     for (int j = 0; j < 3; ++j) {
         for (int i = 0; i < N; ++i) {
@@ -135,7 +140,7 @@ void System::print_pos(std::FILE* file) const {
 
     int buf_cnt = 0;
     for (int i = 0; i < N; ++i) {
-        buf_cnt += std::sprintf(&buf[buf_cnt], "%f %f %f\n", x[0][i],
+        buf_cnt += std::sprintf(&buf[buf_cnt], "%f %f %f ", x[0][i],
                                 x[1][i], x[2][i]);
 
         // if chunk is big enough, write it
@@ -149,7 +154,12 @@ void System::print_pos(std::FILE* file) const {
     }
 
     // write remainder
-    if (buf_cnt > 0) {
+    if (buf_cnt > 0)
         std::fwrite(buf, buf_cnt, 1, file);
-    }
+}
+
+void System::print_ene(std::FILE* file) const {
+    char buf[12];
+    int size = std::sprintf(&buf[0], "%f ", U);
+    std::fwrite(buf, size, 1, file);
 }
