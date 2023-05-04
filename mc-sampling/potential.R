@@ -1,8 +1,8 @@
 library(tidyverse)
 
-niter <- 10000
+niter <- 100000
 potential <- scan(
-    file = "test_U.txt",
+    file = "dump/test_U.txt",
     what = double(),
     n = niter,
     sep = " "

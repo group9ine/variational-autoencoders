@@ -12,8 +12,10 @@ int main(int argc, const char* argv[]) {
 
     // read parameters
     std::string prefix = argv[1];
-    std::FILE* pos_file = std::fopen((prefix + "_x.txt").c_str(), "w");
-    std::FILE* ene_file = std::fopen((prefix + "_U.txt").c_str(), "w");
+    std::FILE* pos_file
+        = std::fopen(("dump/" + prefix + "_x.txt").c_str(), "w");
+    std::FILE* ene_file
+        = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "w");
     int N = std::atoi(argv[2]);
     double gamma = std::atof(argv[3]);
     double radius = std::atof(argv[4]);

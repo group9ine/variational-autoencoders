@@ -48,13 +48,15 @@ void System::evolve(int num_steps, double max_disp, std::FILE* pos_file,
                     std::FILE* ene_file, bool print_energy) {
     dr = max_disp;
 
-    for (int t = 1; t <= num_steps; ++t) {
+    print_pos(pos_file);
+
+    for (int t = 0; t < num_steps; ++t) {
         step();
         if (print_energy)
             print_ene(ene_file);
     }
 
-    print_pos(pos_file);
+    //print_pos(pos_file);
 }
 
 /*
@@ -63,30 +65,28 @@ void System::evolve(int num_steps, double max_disp, std::FILE* pos_file,
 
 void System::step() {
     std::uniform_real_distribution<double> runif(0, 1);
-    for (int j = 0; j < 3; ++j) {
-        for (int i = 0; i < N; ++i) {
-            // calculate potential before flip
-            U = potential();
-            // store current position
+    for (int i = 0; i < N; ++i) {
+        // calculate potential before flip
+        U = potential();
+        // store current position
+        for (int k = 0; k < 3; ++k)
+            x_old[k] = x[k][i];
+        // kick the current particle
+        // if kick fails, restore the position and continue
+        if (!kick(i)) {
             for (int k = 0; k < 3; ++k)
-                x_old[k] = x[k][i];
-            // kick the current particle
-            // if kick fails, restore the position and continue
-            if (!kick(i)) {
-                for (int k = 0; k < 3; ++k)
-                    x[k][i] = x_old[k];
-                continue;
-            }
-            // potential difference
-            dU = potential() - U;
+                x[k][i] = x_old[k];
+            continue;
+        }
+        // potential difference
+        dU = potential() - U;
 
-            // if dU is <= 0, accept the move (i.e. do nothing)
-            // otherwise, restore previous position with
-            // prob = boltzmann factor
-            if (dU > 0 && runif(gen) > exp(-dU / T)) {
-                for (int k = 0; k < 3; ++k)
-                    x[k][i] = x_old[k];
-            }
+        // if dU is <= 0, accept the move (i.e. do nothing)
+        // otherwise, restore previous position with
+        // prob = boltzmann factor
+        if (dU > 0 && runif(gen) > exp(-dU / T)) {
+            for (int k = 0; k < 3; ++k)
+                x[k][i] = x_old[k];
         }
     }
 }
