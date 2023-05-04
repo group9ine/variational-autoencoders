@@ -61,13 +61,9 @@ class VAE(keras.Model):
         with tf.GradientTape() as tape:
             z_mean, z_log_var, z = self.encoder(data)
             reconstruction = self.decoder(z)
-            reconstruction_loss = tf.reduce_mean(
-                tf.reduce_sum(
-                    keras.losses.mean_squared_error(data, reconstruction), axis=(1, 2)
-                )
-            )
+            reconstruction_loss = tf.reduce_mean(keras.losses.mean_squared_error(data, reconstruction))
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
-            kl_loss = tf.reduce_mean(tf.reduce_sum(kl_loss, axis=1))
+            kl_loss = tf.reduce_mean(kl_loss)
             total_loss = reconstruction_loss + l*kl_loss
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
@@ -82,11 +78,10 @@ class VAE(keras.Model):
 
 if __name__=="__main__":
     from sys import argv
-    data = []
     
     with open(argv[1]) as f:
-        data = [[float(i.strip()) for i in s.split(" ")] for s in f.read().split("\n")]
-    
+        data = [[float(i.strip()) for i in s.split(" ") if i!=""] for s in f.read().split("\n") if s!=""]
+    # print(len(data), [len(data[i]) for i in range(len(data))])
     vae = VAE(encoder, decoder)
     vae.compile(optimizer=keras.optimizers.Adam())
     vae.fit(data, epochs=30, batch_size=128)
