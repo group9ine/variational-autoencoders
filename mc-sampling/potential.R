@@ -1,16 +1,13 @@
-library(tidyverse)
+library(tibble)
+library(ggplot2)
+theme_set(theme_minimal(base_size = 16))
+pal <- RColorBrewer::brewer.pal(3, "Dark2")
 
-niter <- 100000
-potential <- scan(
-    file = "dump/test_U.txt",
-    what = double(),
-    n = niter,
-    sep = " "
-)
+niter <- 3000
+potential <- scan(file = "dump/test_U.txt", n = niter, sep = " ")
 
-tibble(
-    iter = rep(1:niter),
-    pot = potential
-) |>
+tibble(iter = 1:niter, pot = potential) |>
     ggplot(aes(x = iter, y = pot)) +
-        geom_line(linewidth = 0.8)
+        geom_point(size = 0.6, colour = "gray40", alpha = 0.5) +
+        geom_smooth(colour = pal[1], fill = pal[1]) +
+        labs(x = "Iteration", y = "Potential")
