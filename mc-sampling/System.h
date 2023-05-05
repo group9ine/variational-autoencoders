@@ -14,13 +14,13 @@ public:
 
     ~System(); // destructor
 
-    void init_config(double radius, double temp);
+    void init_config(double side, double temp);
     void evolve(int num_steps, double max_disp, std::FILE* pos_file,
                 std::FILE* ene_file, bool print_energy);
 
 private:
     int N;
-    double gamma = 1e-13; // mu * g * sigma / epsilon (adimensional)
+    double gamma = 1e-3; // mu * g * sigma / epsilon (adimensional)
     double T;             // temperature
     double L;             // box side
     double* x[3];         // positions array
@@ -37,7 +37,7 @@ private:
     std::uniform_real_distribution<double> runif;
 
     void step();        // function for single MC step
-    bool kick(int i_k); // kick particle at index i_k
+    void kick(int i_k); // kick particle at index i_k
     double potential();
 
     void print_pos(std::FILE* file) const; // print out positions

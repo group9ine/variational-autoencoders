@@ -7,7 +7,10 @@ potential <- scan(
     n = niter,
     sep = " "
 )
-data <- tibble(
+
+tibble(
     iter = rep(1:niter),
     pot = potential
-)
+) |>
+    ggplot(aes(x = iter, y = pot)) +
+        geom_line(linewidth = 0.8)

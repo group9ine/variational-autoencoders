@@ -6,7 +6,7 @@
 int main(int argc, const char* argv[]) {
     if (argc != 7) {
         std::cerr << "Usage: ./main [output file prefix] "
-                  << "[N] [R] [T] [Nt] [dr]\n";
+                  << "[N] [L] [T] [Nt] [dr]\n";
         return -1;
     }
 

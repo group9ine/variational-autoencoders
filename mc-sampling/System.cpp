@@ -9,7 +9,8 @@
  */
 
 System::System(int num_part)
-    : N(num_part), gen(rd()), runif(std::uniform_real_distribution<double>(0, 1)) {
+    : N(num_part), gen(rd()),
+      runif(std::uniform_real_distribution<double>(0, 1)) {
     for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
     }
@@ -55,25 +56,14 @@ void System::step() {
     for (int i = 0; i < N; ++i) {
         // calculate potential before flip
         U = potential();
-        // store current position
-        for (int j = 0; j < 3; ++j) {
-            x_old[j] = x[j][i];
-        }
         // kick the current particle
-        // if kick fails, restore the position and continue
-        if (!kick(i)) {
-            for (int j = 0; j < 3; ++j) {
-                x[j][i] = x_old[j];
-            }
-            continue;
-        }
+        kick(i);
         // potential difference
         dU = potential() - U;
-
         // if dU is <= 0, accept the move (i.e. do nothing)
         // otherwise, restore previous position with
         // prob = boltzmann factor
-        if (dU > 0 && runif(gen) > exp(-dU / T)) {
+        if (dU < 0 || runif(gen) < exp(-dU / T)) {
             for (int j = 0; j < 3; ++j) {
                 x[j][i] = x_old[j];
             }
@@ -81,17 +71,18 @@ void System::step() {
     }
 }
 
-bool System::kick(int i_k) {
+void System::kick(int i_k) {
+    double kick;
     for (int i = 0; i < 3; ++i) {
-        x[i][i_k] += dr * (2 * runif(gen) - 1); // btw -dr and +dr
-        if (x[i][i_k] < 0) {
-            return false;
-        } else if (i < 2 && x[i][i_k] > L) {
-            return false;
+        x_old[i] = x[i][i_k];
+        kick = dr * (2 * runif(gen) - 1); // btw -dr and +dr
+        // x, y need to be in [0, L], z only > 0
+        if (x_old[i] + kick < 0 || (i < 2 && x_old[i] + kick > L)) {
+            x[i][i_k] -= kick;
+        } else {
+            x[i][i_k] += kick;
         }
     }
-
-    return true;
 }
 
 double System::potential() {
