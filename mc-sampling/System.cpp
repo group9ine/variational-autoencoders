@@ -94,7 +94,7 @@ void System::step() {
         // if dU is <= 0, accept the move (i.e. do nothing)
         // otherwise, restore previous position with
         // prob = boltzmann factor
-        if (dU > 0 && runif(gen) > std::exp(-dU / T)) {
+        if (dU > 0 && runif(gen) < std::exp(-dU / T)) {
             for (int j = 0; j < 3; ++j) {
                 x[j][i] = x_old[j];
             }
