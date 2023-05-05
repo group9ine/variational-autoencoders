@@ -171,6 +171,6 @@ void System::print_pos(std::FILE* file) const {
 
 void System::print_ene(std::FILE* file) const {
     char buf[64];
-    int size = std::sprintf(&buf[0], "%f ", U);
+    int size = std::sprintf(&buf[0], "%f\n", U);
     std::fwrite(buf, size, 1, file);
 }
