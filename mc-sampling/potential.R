@@ -3,7 +3,7 @@ library(ggplot2)
 theme_set(theme_minimal(base_size = 16))
 pal <- RColorBrewer::brewer.pal(3, "Dark2")
 
-niter <- 3000
+niter <- 8000
 potential <- scan(file = "dump/test_U.txt", n = niter, sep = " ")
 
 tibble(iter = 1:niter, pot = potential) |>
