@@ -40,7 +40,6 @@ System::System(int num_part, double side) : N(num_part), L(side) {
                 }
                 if (r2 < threshold) {
                     too_close = true;
-                    std::cout << "too close!\n";
                     break;
                 }
             }
@@ -60,10 +59,21 @@ void System::evolve(int num_steps, double temp, double max_disp,
     T = temp;
     dr = max_disp;
 
+    int avg_window = int(num_steps / 10);
     for (int t = 0; t < num_steps; ++t) {
         step();
-        if (print_energy)
+        if (print_energy) {
             print_ene(ene_file);
+        }
+
+        if (t % avg_window == 0) {
+            double z_mean = 0.0;
+            for (int i = 0; i < N; ++i) {
+                z_mean += x[2][i];
+            }
+            z_mean /= N;
+            std::cout << z_mean << '\n';
+        }
     }
 
     print_pos(pos_file);
