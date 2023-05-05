@@ -20,12 +20,11 @@ int main(int argc, const char* argv[]) {
     double box_side = std::atof(argv[3]);
     double temp = std::atof(argv[4]);
     int num_steps = std::atoi(argv[5]);
-    double dr = std::atoi(argv[6]);
+    double dr = std::atof(argv[6]);
 
     // start system and evolve
-    System sys(N);
-    sys.init_config(box_side, temp);
-    sys.evolve(num_steps, dr, pos_file, ene_file, true);
+    System sys(N, box_side);
+    sys.evolve(num_steps, temp, dr, pos_file, ene_file, true);
 
     // close out files
     std::fclose(pos_file);

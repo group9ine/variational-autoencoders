@@ -6,7 +6,7 @@
 
 class System {
 public:
-    System(int num_part); // constructor
+    System(int num_part, double side); // constructor
 
     // assignment stuff
     System(const System& x) = delete;
@@ -14,13 +14,13 @@ public:
 
     ~System(); // destructor
 
-    void init_config(double side, double temp);
-    void evolve(int num_steps, double max_disp, std::FILE* pos_file,
-                std::FILE* ene_file, bool print_energy);
+    void evolve(int num_steps, double temp, double max_disp,
+                std::FILE* pos_file, std::FILE* ene_file,
+                bool print_energy);
 
 private:
     int N;
-    double gamma = 1e-3; // mu * g * sigma / epsilon (adimensional)
+    double gamma = 1e-13; // mu * g * sigma / epsilon (adimensional)
     double T;             // temperature
     double L;             // box side
     double* x[3];         // positions array
@@ -32,7 +32,6 @@ private:
     double r_cut2 = r_cut * r_cut;
 
     // random uniform generator
-    std::random_device rd;
     std::mt19937 gen;
     std::uniform_real_distribution<double> runif;
 

@@ -1,6 +1,6 @@
 #include "System.h"
-#include <chrono>
 #include <cmath>
+#include <iostream>
 
 #define CHUNK_SIZE 4096
 
@@ -8,11 +8,43 @@
  * PUBLIC
  */
 
-System::System(int num_part)
-    : N(num_part), gen(rd()),
-      runif(std::uniform_real_distribution<double>(0, 1)) {
+System::System(int num_part, double side) : N(num_part), L(side) {
     for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
+    }
+
+    // set up random number generator
+    std::random_device rd;
+    gen = std::mt19937(rd());
+    runif = std::uniform_real_distribution<double>(0, 1);
+
+    // sigma = minimum distance threshold
+    double threshold = 1;
+
+    // set random initial positions
+    bool too_close;
+    double r, r2;
+    for (int i = 0; i < N; ++i) {
+        do {
+            for (int j = 0; j < 3; ++j) {
+                x[j][i] = L * runif(gen);
+            }
+
+            // check distance to all previously generated particles
+            too_close = false;
+            for (int j = 0; j < i; ++j) {
+                r2 = 0.0;
+                for (int k = 0; k < 3; ++k) {
+                    r = x[k][i] - x[k][j];
+                    r2 += r * r;
+                }
+                if (r2 < threshold) {
+                    too_close = true;
+                    std::cout << "too close!\n";
+                    break;
+                }
+            }
+        } while (too_close);
     }
 }
 
@@ -22,21 +54,10 @@ System::~System() {
     }
 }
 
-void System::init_config(double side, double temp) {
-    // set private variables
-    L = side;
+void System::evolve(int num_steps, double temp, double max_disp,
+                    std::FILE* pos_file, std::FILE* ene_file,
+                    bool print_energy) {
     T = temp;
-
-    // set random initial positions
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < N; ++j) {
-            x[i][j] = L * runif(gen); // initialize in (0, L)
-        }
-    }
-}
-
-void System::evolve(int num_steps, double max_disp, std::FILE* pos_file,
-                    std::FILE* ene_file, bool print_energy) {
     dr = max_disp;
 
     for (int t = 0; t < num_steps; ++t) {
@@ -63,7 +84,7 @@ void System::step() {
         // if dU is <= 0, accept the move (i.e. do nothing)
         // otherwise, restore previous position with
         // prob = boltzmann factor
-        if (dU < 0 || runif(gen) < exp(-dU / T)) {
+        if (dU > 0 && runif(gen) > std::exp(-dU / T)) {
             for (int j = 0; j < 3; ++j) {
                 x[j][i] = x_old[j];
             }
@@ -76,8 +97,7 @@ void System::kick(int i_k) {
     for (int i = 0; i < 3; ++i) {
         x_old[i] = x[i][i_k];
         kick = dr * (2 * runif(gen) - 1); // btw -dr and +dr
-        // x, y need to be in [0, L], z only > 0
-        if (x_old[i] + kick < 0 || (i < 2 && x_old[i] + kick > L)) {
+        if (x_old[i] + kick < 0 || x_old[i] + kick > L) {
             x[i][i_k] -= kick;
         } else {
             x[i][i_k] += kick;
@@ -87,7 +107,7 @@ void System::kick(int i_k) {
 
 double System::potential() {
     // distance between two atoms
-    double r[3];
+    double r;
     // sq. mod. of r and 1/r^6
     double r2, sr6;
 
@@ -98,8 +118,8 @@ double System::potential() {
         for (int j = i + 1; j < N; ++j) {
             r2 = 0.0;
             for (int k = 0; k < 3; ++k) {
-                r[k] = x[k][i] - x[k][j];
-                r2 += r[k] * r[k];
+                r = x[k][i] - x[k][j];
+                r2 += r * r;
             }
 
             // if radius less than cut, add to U
