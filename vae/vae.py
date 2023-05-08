@@ -81,6 +81,7 @@ if __name__=="__main__":
     
     with open(argv[1]) as f:
         data = [[float(i.strip()) for i in s.split(" ") if i!=""] for s in f.read().split("\n") if s!=""]
+    
     # print(len(data), [len(data[i]) for i in range(len(data))])
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint("./checkpoints", save_best_only=True)
     
