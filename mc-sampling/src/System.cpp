@@ -54,7 +54,7 @@ void System::evolve(int num_steps, double temp, double max_disp,
                     bool print_energy) {
     T = temp;
     dr = max_disp;
-    nacc = 0;
+    nrej = 0;
 
     for (int t = 0; t < num_steps; ++t) {
         step();
@@ -64,7 +64,8 @@ void System::evolve(int num_steps, double temp, double max_disp,
         }
     }
 
-    std::cout << "Acceptance rate: " << nacc / (N * num_steps) << '\n';
+    std::cout << "Acceptance rate: " << 1 - double(nrej) / (N * num_steps)
+              << '\n';
 }
 
 /*
@@ -83,11 +84,10 @@ void System::step() {
         // otherwise, restore previous position with
         // prob = boltzmann factor
         if (dU > 0 && runif(gen) > std::exp(-dU / T)) {
+            nrej += 1;
             for (int j = 0; j < 3; ++j) {
                 x[j][i] = x_old[j];
             }
-        } else {
-            nacc += 1;
         }
     }
 }
