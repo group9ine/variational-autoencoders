@@ -22,11 +22,11 @@ int main(int argc, const char* argv[]) {
     }
 
     double temp = std::atof(argv[4]);
-    int num_steps = std::atoi(argv[5]);
+    int nsteps = std::atoi(argv[5]);
     double dr = std::atof(argv[6]);
 
     std::stringstream params;
-    params << "_" << N << "_" << dist << "_" << temp << "_" << num_steps
+    params << "_" << N << "_" << dist << "_" << temp << "_" << nsteps
            << "_" << dr;
     prefix += params.str();
 
@@ -36,7 +36,9 @@ int main(int argc, const char* argv[]) {
         = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "w");
     // start system and evolve
     System sys(N, dist);
-    sys.evolve(num_steps, temp, dr, pos_file, ene_file, true);
+    // last two arguments decide whether to print energy and positions
+    // at every timestep
+    sys.evolve(nsteps, temp, dr, pos_file, ene_file, true, true);
 
     // close out files
     std::fclose(pos_file);

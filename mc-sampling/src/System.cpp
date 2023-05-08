@@ -8,7 +8,7 @@
  * PUBLIC
  */
 
-System::System(int num_part, double dist) : N(num_part), d(dist) {
+System::System(int npart, double dist) : N(npart), d(dist) {
     for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
     }
@@ -49,22 +49,31 @@ System::~System() {
     }
 }
 
-void System::evolve(int num_steps, double temp, double max_disp,
+void System::evolve(int nsteps, double temp, double max_disp,
                     std::FILE* pos_file, std::FILE* ene_file,
-                    bool print_energy) {
+                    bool print_energy, bool print_mid_pos) {
     T = temp;
     dr = max_disp;
-    nrej = 0;
 
-    for (int t = 0; t < num_steps; ++t) {
+    for (int t = 0; t < nsteps; ++t) {
         step();
-        print_pos(pos_file);
-        if (print_energy) {
+        // print positions inside the loop if wanted
+        if (print_mid_pos) {
+            print_pos(pos_file);
+        }
+        // print energy every 20 timesteps
+        if (print_energy && t % 20 == 0) {
+            U = potential_full();
             print_ene(ene_file);
         }
     }
 
-    std::cout << "Acceptance rate: " << 1 - double(nrej) / (N * num_steps)
+    // if we don't middle positions, print at least the final one
+    if (!print_mid_pos) {
+        print_pos(pos_file);
+    }
+
+    std::cout << "Acceptance rate: " << 1 - double(nrej) / (N * nsteps)
               << '\n';
 }
 
@@ -75,11 +84,11 @@ void System::evolve(int num_steps, double temp, double max_disp,
 void System::step() {
     for (int i = 0; i < N; ++i) {
         // calculate potential before flip
-        U = potential();
+        U = potential_one(i);
         // kick the current particle
         kick(i);
         // potential difference
-        dU = potential() - U;
+        dU = potential_one(i) - U;
         // if dU is <= 0, accept the move (i.e. do nothing)
         // otherwise, restore previous position with
         // prob = boltzmann factor
@@ -105,7 +114,35 @@ void System::kick(int i_k) {
     }
 }
 
-double System::potential() {
+double System::potential_one(int i_k) {
+    // distance between two atoms
+    double r;
+    // sq. mod. of r and 1/r^6
+    double r2, sr6;
+
+    // start with gravitational potential
+    double pot = gamma * x[2][i_k];
+    // loop over all other particles
+    for (int i = 0; i < N; ++i) {
+        if (i != i_k) {
+            r2 = 0.0;
+            for (int j = 0; j < 3; ++j) {
+                r = x[j][i] - x[j][i_k];
+                r2 += r * r;
+            }
+
+            // if radius less than cut, add to U
+            if (r2 < r_cut2) {
+                sr6 = 1.0 / (r2 * r2 * r2);
+                pot += 4 * (sr6 * sr6 - sr6);
+            }
+        }
+    }
+
+    return pot;
+}
+
+double System::potential_full() {
     // distance between two atoms
     double r;
     // sq. mod. of r and 1/r^6
