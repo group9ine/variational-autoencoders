@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# mc-sampling stuff
-mc-sampling/dump
+# trials & mock files
+*prova*
