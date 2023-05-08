@@ -27,7 +27,8 @@ private:
     double* x[3];         // positions array
     double x_old[3];      // array to store old position of kicked particle
     double dr;            // (maximum) random displacement
-    double U, dU;
+    double U, dU;         // potential and pot. diff. for Metropolis
+    int nacc;             // number of accepted moves
 
     double r_cut = 3.0; // cutoff radius
     double r_cut2 = r_cut * r_cut;

@@ -54,6 +54,7 @@ void System::evolve(int num_steps, double temp, double max_disp,
                     bool print_energy) {
     T = temp;
     dr = max_disp;
+    nacc = 0;
 
     for (int t = 0; t < num_steps; ++t) {
         step();
@@ -62,6 +63,8 @@ void System::evolve(int num_steps, double temp, double max_disp,
             print_ene(ene_file);
         }
     }
+
+    std::cout << "Acceptance rate: " << nacc / (N * num_steps) << '\n';
 }
 
 /*
@@ -83,6 +86,8 @@ void System::step() {
             for (int j = 0; j < 3; ++j) {
                 x[j][i] = x_old[j];
             }
+        } else {
+            nacc += 1;
         }
     }
 }
