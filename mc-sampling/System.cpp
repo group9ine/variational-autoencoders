@@ -57,12 +57,12 @@ void System::evolve(int num_steps, double temp, double max_disp,
 
     for (int t = 0; t < num_steps; ++t) {
         step();
+        print_pos(pos_file);
         if (print_energy) {
             print_ene(ene_file);
         }
     }
 
-    print_pos(pos_file);
 }
 
 /*
