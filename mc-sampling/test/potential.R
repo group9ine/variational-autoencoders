@@ -3,8 +3,9 @@ library(ggplot2)
 theme_set(theme_minimal(base_size = 16))
 pal <- RColorBrewer::brewer.pal(3, "Dark2")
 
-niter <- 8000
-potential <- scan(file = "dump/test_U.txt", n = niter, sep = " ")
+niter <- 10000
+fname <- list.files(path = "dump", pattern = "*_U.txt", full.names = TRUE)
+potential <- scan(file = fname, n = niter, sep = "\n")
 
 tibble(iter = 1:niter, pot = potential) |>
     ggplot(aes(x = iter, y = pot)) +

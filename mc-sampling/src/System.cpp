@@ -8,7 +8,7 @@
  * PUBLIC
  */
 
-System::System(int num_part, double side) : N(num_part), L(side) {
+System::System(int num_part, double dist) : N(num_part), d(dist) {
     for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
     }
@@ -18,32 +18,28 @@ System::System(int num_part, double side) : N(num_part), L(side) {
     gen = std::mt19937(rd());
     runif = std::uniform_real_distribution<double>(0, 1);
 
-    // sigma = minimum distance threshold
-    double threshold = 1;
+    // particles in each direction
+    int n = int(ceil(pow(double(N), 1.0 / 3)));
+    // box side length
+    L = n * d;
 
-    // set random initial positions
-    bool too_close;
-    double r, r2;
-    for (int i = 0; i < N; ++i) {
-        do {
-            for (int j = 0; j < 3; ++j) {
-                x[j][i] = L * runif(gen);
-            }
-
-            // check distance to all previously generated particles
-            too_close = false;
-            for (int j = 0; j < i; ++j) {
-                r2 = 0.0;
-                for (int k = 0; k < 3; ++k) {
-                    r = x[k][i] - x[k][j];
-                    r2 += r * r;
-                }
-                if (r2 < threshold) {
-                    too_close = true;
+    // put the particles in the lattice keeping count
+    // of how many have been already put in
+    int p_ass = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            for (int k = 0; k < n; ++k) {
+                if (p_ass < N) {
+                    // random displacement of ±d/3 from the cell centre
+                    x[0][p_ass] = (i + 1 / 6 + 2 * runif(gen) / 3) * d;
+                    x[1][p_ass] = (j + 1 / 6 + 2 * runif(gen) / 3) * d;
+                    x[2][p_ass] = (k + 1 / 6 + 2 * runif(gen) / 3) * d;
+                    ++p_ass;
+                } else {
                     break;
                 }
             }
-        } while (too_close);
+        }
     }
 }
 
@@ -58,25 +54,18 @@ void System::evolve(int num_steps, double temp, double max_disp,
                     bool print_energy) {
     T = temp;
     dr = max_disp;
+    nrej = 0;
 
-    int avg_window = int(num_steps / 10);
     for (int t = 0; t < num_steps; ++t) {
         step();
+        print_pos(pos_file);
         if (print_energy) {
             print_ene(ene_file);
         }
-
-        if (t % avg_window == 0) {
-            double z_mean = 0.0;
-            for (int i = 0; i < N; ++i) {
-                z_mean += x[2][i];
-            }
-            z_mean /= N;
-            std::cout << z_mean << '\n';
-        }
     }
 
-    print_pos(pos_file);
+    std::cout << "Acceptance rate: " << 1 - double(nrej) / (N * num_steps)
+              << '\n';
 }
 
 /*
@@ -95,6 +84,7 @@ void System::step() {
         // otherwise, restore previous position with
         // prob = boltzmann factor
         if (dU > 0 && runif(gen) > std::exp(-dU / T)) {
+            nrej += 1;
             for (int j = 0; j < 3; ++j) {
                 x[j][i] = x_old[j];
             }
@@ -164,9 +154,9 @@ void System::print_pos(std::FILE* file) const {
         }
     }
 
-    // write remainder
-    if (buf_cnt > 0)
-        std::fwrite(buf, buf_cnt, 1, file);
+    // write final newline
+    buf_cnt += std::sprintf(&buf[buf_cnt], "\n");
+    std::fwrite(buf, buf_cnt, 1, file);
 }
 
 void System::print_ene(std::FILE* file) const {

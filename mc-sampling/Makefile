@@ -1,11 +1,11 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -pedantic-errors -O3
 
-main: main.o System.o
-	${CXX} ${CXXFLAGS} main.o System.o -o main
-main.o: main.cpp System.h
-	${CXX} ${CXXFLAGS} -c main.cpp
-System.o: System.cpp System.h
-	${CXX} ${CXXFLAGS} -c System.cpp
+main: src/main.o src/System.o
+	${CXX} ${CXXFLAGS} src/main.o src/System.o -o main
+main.o: src/main.cpp src/System.h
+	${CXX} ${CXXFLAGS} -c src/main.cpp
+System.o: src/System.cpp src/System.h
+	${CXX} ${CXXFLAGS} -c src/System.cpp
 clean:
-	rm -f *.o
+	rm -f src/*.o
