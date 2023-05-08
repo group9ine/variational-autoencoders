@@ -6,7 +6,7 @@
 
 class System {
 public:
-    System(int num_part, double side); // constructor
+    System(int num_part, double dist); // constructor
 
     // assignment stuff
     System(const System& x) = delete;
@@ -22,6 +22,7 @@ private:
     int N;
     double gamma = 1e-13; // mu * g * sigma / epsilon (adimensional)
     double T;             // temperature
+    double d;             // inter-particle distance in the initial lattice
     double L;             // box side
     double* x[3];         // positions array
     double x_old[3];      // array to store old position of kicked particle
