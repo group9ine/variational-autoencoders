@@ -62,7 +62,6 @@ void System::evolve(int num_steps, double temp, double max_disp,
             print_ene(ene_file);
         }
     }
-
 }
 
 /*
