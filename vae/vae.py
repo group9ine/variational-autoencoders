@@ -19,10 +19,14 @@ class Sampling(layers.Layer):
 latent_dim = 2
 l = 0
 
-encoder_inputs = keras.Input(shape=(60,))
-x = layers.Dense(45, activation="relu")(encoder_inputs)
-x = layers.Dense(30, activation="relu")(x)
-x = layers.Dense(15, activation="relu")(x)
+encoder_inputs = keras.Input(shape=(1,40,40,40))
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(encoder_inputs)
+x = layers.MaxPool3D((2,2,2), data_format="channels_first")(x)
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
+x = layers.MaxPool3D((2,2,2), data_format="channels_first")(x)
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
+x = layers.MaxPool3D((2,2,2), data_format="channels_first")(x)
+x = layers.Flatten()(x)
 z_mean = layers.Dense(latent_dim, name="z_mean")(x)
 z_log_var = layers.Dense(latent_dim, name="z_log_var")(x)
 z = Sampling()([z_mean, z_log_var])
@@ -30,10 +34,15 @@ encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder")
 #encoder.summary()
 
 latent_inputs = keras.Input(shape=(latent_dim,))
-x = layers.Dense(15, activation="relu")(latent_inputs)
-x = layers.Dense(30, activation="relu")(x)
-x = layers.Dense(45, activation="relu")(x)
-decoder_outputs = layers.Dense(60, activation="sigmoid")(x)
+x = layers.Dense(125)(latent_inputs)
+x = layers.Reshape((1,5,5,5))(x)
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(encoder_inputs)
+x = layers.UpSampling3D((2,2,2), data_format="channels_first")(x)
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
+x = layers.UpSampling3D((2,2,2), data_format="channels_first")(x)
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
+x = layers.UpSampling3D((2,2,2), data_format="channels_first")(x)
+decoder_outputs = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 #decoder.summary()
 
@@ -78,16 +87,34 @@ class VAE(keras.Model):
 
 if __name__=="__main__":
     from sys import argv
+    from math import ceil
+    from spatial_scan import scan
+    
+    batch_len = 1000
     
     with open(argv[1]) as f:
         data = [[float(i.strip()) for i in s.split(" ") if i!=""] for s in f.read().split("\n") if s!=""]
+        xyz=[[[data[h][i+3*j]for i in range(3)]for j in range(len(data[h])//3)]for h in range(len(data))]
+        del data
     
     # print(len(data), [len(data[i]) for i in range(len(data))])
     model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint("./checkpoints", save_best_only=True)
     
-    vae = VAE(encoder, decoder)
+    if len(argv)>2 and argv[2]=="--resume":
+        vae=keras.models.load_model()
+    else:
+        vae = VAE(encoder, decoder)
     vae.compile(optimizer=keras.optimizers.Adam())
-    vae.fit(data, epochs=30, batch_size=128, callbacks=[model_checkpoint_callback])
+    
+    for i in range(ceil(len(xyz)/batch_len)):
+        bdata = [] # will hold bucketed data version
+        for j in range(batch_len*i, batch_len*(i+1)):
+            if j>len(xyz):
+                break
+            #print(xyz[j])
+            bdata.append(scan([xyz[j],4,4,4]))
+        vae.fit(bdata, epochs=30, batch_size=128, callbacks=[model_checkpoint_callback])
+    
     vae.load_weights("./checkpoints")
     vae.save("./model_info/")
     # retrieve with vae=keras.models.load_model()
