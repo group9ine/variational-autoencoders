@@ -10,8 +10,9 @@
 
 System::System(int npart, double side, double g)
     : N(npart), L(side), gamma(g) {
-    for (int i = 0; i < 3; ++i) {
-        x[i] = new double[N];
+    x = new double*[N];
+    for (int i = 0; i < N; ++i) {
+        x[i] = new double[3];
     }
 
     // set up random number generator
@@ -19,17 +20,18 @@ System::System(int npart, double side, double g)
     gen = std::mt19937(rd());
     runif = std::uniform_real_distribution<double>(0, 1);
 
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < N; ++j) {
-            x[i][j] = L * runif(gen);
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < 3; ++j) {
+            x[i][j] = L * runif(gen); // generate btw 0 and L
         }
     }
 }
 
 System::~System() {
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < N; ++i) {
         delete[] x[i];
     }
+    delete[] x;
 }
 
 void System::evolve(int nsteps, double temp, double max_disp,
@@ -57,7 +59,7 @@ void System::evolve(int nsteps, double temp, double max_disp,
     }
 
     std::cout << "Acceptance rate: " << 1 - double(nrej) / (N * nsteps)
-              << '\n';
+              << std::endl;
 }
 
 /*
@@ -78,47 +80,47 @@ void System::step() {
         if (dU > 0 && runif(gen) > std::exp(-dU / T)) {
             nrej += 1;
             for (int j = 0; j < 3; ++j) {
-                x[j][i] = x_old[j];
+                x[i][j] = x_old[j];
             }
         }
     }
 }
 
-void System::kick(int i_k) {
+void System::kick(int k) {
     double kick;
-    for (int i = 0; i < 2; ++i) {
-        x_old[i] = x[i][i_k];
-        kick = x_old[i] + dr * (2 * runif(gen) - 1); // btw -dr and +dr
+    for (int j = 0; j < 2; ++j) {
+        x_old[j] = x[k][j];
+        kick = x_old[j] + dr * (2 * runif(gen) - 1); // btw -dr and +dr
         // periodic boundary conditions
-        x[i][i_k] = kick - rint(kick / L);
+        x[k][j] = kick > 0 ? kick - L : kick + L;
     }
 
     // in z we want to bounce on the floor
-    x_old[2] = x[2][i_k];
+    x_old[2] = x[k][2];
     kick = x_old[2] + dr * (2 * runif(gen) - 1);
     if (kick < 0) {
-        x[2][i_k] = -kick;
+        x[k][2] = -kick;
     } else if (kick > L) {
-        x[2][i_k] = 2 * L - kick;
+        x[k][2] = 2 * L - kick;
     } else {
-        x[2][i_k] = kick;
+        x[k][2] = kick;
     }
 }
 
-double System::potential_one(int i_k) {
+double System::potential_one(int k) {
     // distance between two atoms
     double r;
     // sq. mod. of r and 1/r^6
     double r2, sr6;
 
     // start with gravitational potential
-    double pot = gamma * x[2][i_k];
+    double pot = gamma * x[2][k];
     // loop over all other particles
     for (int i = 0; i < N; ++i) {
-        if (i != i_k) {
+        if (i != k) {
             r2 = 0.0;
             for (int j = 0; j < 3; ++j) {
-                r = x[j][i] - x[j][i_k];
+                r = x[i][j] - x[k][j];
                 r2 += r * r;
             }
 
@@ -142,11 +144,11 @@ double System::potential_full() {
     double pot = 0.0;
     for (int i = 0; i < (N - 1); ++i) {
         // add gravitational part
-        pot += gamma * x[2][i];
+        pot += gamma * x[i][2];
         for (int j = i + 1; j < N; ++j) {
             r2 = 0.0;
             for (int k = 0; k < 3; ++k) {
-                r = x[k][i] - x[k][j];
+                r = x[i][k] - x[j][k];
                 r2 += r * r;
             }
 
@@ -159,7 +161,7 @@ double System::potential_full() {
     }
 
     // add last particle's gravitational pot
-    pot += gamma * x[2][N - 1];
+    pot += gamma * x[N - 1][2];
 
     return pot;
 }
@@ -169,8 +171,8 @@ void System::print_pos(std::FILE* file) const {
 
     int buf_cnt = 0;
     for (int i = 0; i < N; ++i) {
-        buf_cnt += std::sprintf(&buf[buf_cnt], "%f %f %f ", x[0][i],
-                                x[1][i], x[2][i]);
+        buf_cnt += std::sprintf(&buf[buf_cnt], "%f %f %f ", x[i][0],
+                                x[i][1], x[i][2]);
 
         // if chunk is big enough, write it
         if (buf_cnt >= CHUNK_SIZE) {

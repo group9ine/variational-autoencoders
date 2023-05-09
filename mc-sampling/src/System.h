@@ -23,7 +23,7 @@ private:
     double L;        // box side
     double gamma;    // mu * g * sigma / epsilon (adimensional)
     double T;        // temperature
-    double* x[3];    // positions array
+    double** x;      // positions array
     double x_old[3]; // array to store old position of kicked particle
     double dr;       // (maximum) random displacement
     double U, dU;    // potential and pot. diff. for Metropolis
@@ -36,10 +36,10 @@ private:
     std::mt19937 gen;
     std::uniform_real_distribution<double> runif;
 
-    void step();                   // function for single MC step
-    void kick(int i_k);            // kick particle at index i_k
-    double potential_one(int i_k); // potential of single particle
-    double potential_full();       // total potential
+    void step();                 // function for single MC step
+    void kick(int k);            // kick particle at index k
+    double potential_one(int k); // potential of single particle
+    double potential_full();     // total potential
 
     void print_pos(std::FILE* file) const; // print out positions
     void print_ene(std::FILE* file) const; // print out potential
