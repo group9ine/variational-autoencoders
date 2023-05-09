@@ -8,7 +8,8 @@
  * PUBLIC
  */
 
-System::System(int npart, double side) : N(npart), L(side) {
+System::System(int npart, double side, double g)
+    : N(npart), L(side), gamma(g) {
     for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
     }
