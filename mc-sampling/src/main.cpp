@@ -20,13 +20,13 @@ int main(int argc, const char* argv[]) {
     // particles per side if they were in a cubic lattice
     int n = int(ceil(pow(double(N), 1.0 / 3)));
     if (side / n) {
-        std::cerr << "Oh, look who's caused another issue. "
-                  << "Surprise, surprise. If you could just take a "
-                  << "moment to fix the box side length, that would be "
-                  << "*so* appreciated. We wouldn't want to, you know, "
-                  << "inconvenience anyone. Heaven forbid. Thanks for "
-                  << "your *prompt* attention to this matter. Don't "
-                  << "worry, I'll just sit here and wait for you to "
+        std::cerr << "Oh, look who's caused another issue.\n"
+                  << "Surprise, surprise. If you could just take a\n"
+                  << "moment to fix the box side length, that would be\n"
+                  << "*so* appreciated. We wouldn't want to, you know,\n"
+                  << "inconvenience anyone. Heaven forbid. Thanks for\n"
+                  << "your *prompt* attention to this matter. Don't\n"
+                  << "worry, I'll just sit here and wait for you to\n"
                   << "do your job.\n";
     }
 
