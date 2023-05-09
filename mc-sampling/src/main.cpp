@@ -27,7 +27,7 @@ int main(int argc, const char* argv[]) {
                   << "inconvenience anyone. Heaven forbid. Thanks for\n"
                   << "your *prompt* attention to this matter. Don't\n"
                   << "worry, I'll just sit here and wait for you to\n"
-                  << "do your job.\n";
+                  << "do your job.\n\n";
     }
 
     double temp = std::atof(argv[5]);
@@ -35,8 +35,8 @@ int main(int argc, const char* argv[]) {
     double dr = std::atof(argv[7]);
 
     std::stringstream params;
-    params << "_" << N << "_" << side << "_" << temp << "_" << nsteps
-           << "_" << dr;
+    params << "_" << N << "_" << side << "_" << gamma << "_" << temp << "_"
+           << nsteps << "_" << dr;
     prefix += params.str();
 
     std::FILE* pos_file
