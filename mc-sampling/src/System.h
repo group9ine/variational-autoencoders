@@ -6,7 +6,7 @@
 
 class System {
 public:
-    System(int npart, double dist); // constructor
+    System(int npart, double side); // constructor
 
     // assignment stuff
     System(const System& x) = delete;
@@ -20,15 +20,14 @@ public:
 
 private:
     int N;
-    double gamma = 1e-13; // mu * g * sigma / epsilon (adimensional)
-    double T;             // temperature
-    double d;             // inter-particle distance in the initial lattice
-    double L;             // box side
-    double* x[3];         // positions array
-    double x_old[3];      // array to store old position of kicked particle
-    double dr;            // (maximum) random displacement
-    double U, dU;         // potential and pot. diff. for Metropolis
-    int nrej = 0;         // number of rejected moves
+    double gamma = 0.05; // mu * g * sigma / epsilon (adimensional)
+    double T;            // temperature
+    double L;            // box side
+    double* x[3];        // positions array
+    double x_old[3];     // array to store old position of kicked particle
+    double dr;           // (maximum) random displacement
+    double U, dU;        // potential and pot. diff. for Metropolis
+    int nrej = 0;        // number of rejected moves
 
     double r_cut = 3.0; // cutoff radius
     double r_cut2 = r_cut * r_cut;

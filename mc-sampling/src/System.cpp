@@ -8,7 +8,7 @@
  * PUBLIC
  */
 
-System::System(int npart, double dist) : N(npart), d(dist) {
+System::System(int npart, double side) : N(npart), L(side) {
     for (int i = 0; i < 3; ++i) {
         x[i] = new double[N];
     }
@@ -18,27 +18,9 @@ System::System(int npart, double dist) : N(npart), d(dist) {
     gen = std::mt19937(rd());
     runif = std::uniform_real_distribution<double>(0, 1);
 
-    // particles in each direction
-    int n = int(ceil(pow(double(N), 1.0 / 3)));
-    // box side length
-    L = n * d;
-
-    // put the particles in the lattice keeping count
-    // of how many have been already put in
-    int p_ass = 0;
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            for (int k = 0; k < n; ++k) {
-                if (p_ass < N) {
-                    // random displacement of ±d/3 from the cell centre
-                    x[0][p_ass] = (i + 1 / 6 + 2 * runif(gen) / 3) * d;
-                    x[1][p_ass] = (j + 1 / 6 + 2 * runif(gen) / 3) * d;
-                    x[2][p_ass] = (k + 1 / 6 + 2 * runif(gen) / 3) * d;
-                    ++p_ass;
-                } else {
-                    break;
-                }
-            }
+    for (int i = 0; i < 3; ++i) {
+        for (int j = 0; j < N; ++j) {
+            x[i][j] = L * runif(gen);
         }
     }
 }
@@ -61,8 +43,8 @@ void System::evolve(int nsteps, double temp, double max_disp,
         if (print_mid_pos) {
             print_pos(pos_file);
         }
-        // print energy every 20 timesteps
-        if (print_energy && t % 20 == 0) {
+        // print energy every 50 timesteps
+        if (print_energy && t % 50 == 0) {
             U = potential_full();
             print_ene(ene_file);
         }
@@ -103,14 +85,22 @@ void System::step() {
 
 void System::kick(int i_k) {
     double kick;
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 2; ++i) {
         x_old[i] = x[i][i_k];
-        kick = dr * (2 * runif(gen) - 1); // btw -dr and +dr
-        if (x_old[i] + kick < 0 || x_old[i] + kick > L) {
-            x[i][i_k] -= kick;
-        } else {
-            x[i][i_k] += kick;
-        }
+        kick = x_old[i] + dr * (2 * runif(gen) - 1); // btw -dr and +dr
+        // periodic boundary conditions
+        x[i][i_k] = kick - rint(kick / L);
+    }
+
+    // in z we want to bounce on the floor
+    x_old[2] = x[2][i_k];
+    kick = x_old[2] + dr * (2 * runif(gen) - 1);
+    if (kick < 0) {
+        x[2][i_k] = -kick;
+    } else if (kick > L) {
+        x[2][i_k] = 2 * L - kick;
+    } else {
+        x[2][i_k] = kick;
     }
 }
 
