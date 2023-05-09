@@ -19,8 +19,8 @@ int main(int argc, const char* argv[]) {
     // particles per side if they were in a cubic lattice
     int n = int(ceil(pow(double(N), 1.0 / 3)));
     if (side / n) {
-        std::cerr << "Particles are too close, try again. WAH\n";
-        return -1;
+        std::cerr << "Particles are too close,"
+                  << "choose better next time. WAH\n";
     }
 
     double temp = std::atof(argv[4]);
