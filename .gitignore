@@ -131,5 +131,6 @@ dmypy.json
 # trials & mock files
 *prova*
 
-# mc-sampling dump files
+# mc-sampling files
 mc-sampling/dump
+mc-sampling/main
