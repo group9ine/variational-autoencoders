@@ -14,7 +14,7 @@ public:
 
     ~System(); // destructor
 
-    void evolve(int nsteps, double temp, double max_disp,
+    void evolve(int nsteps, int nsample, double temp, double max_disp,
                 std::FILE* pos_file, std::FILE* ene_file,
                 bool print_energy, bool print_mid_pos);
 

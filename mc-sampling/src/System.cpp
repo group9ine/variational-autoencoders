@@ -34,7 +34,7 @@ System::~System() {
     delete[] x;
 }
 
-void System::evolve(int nsteps, double temp, double max_disp,
+void System::evolve(int nsteps, int nsample, double temp, double max_disp,
                     std::FILE* pos_file, std::FILE* ene_file,
                     bool print_energy, bool print_mid_pos) {
     T = temp;
@@ -42,14 +42,13 @@ void System::evolve(int nsteps, double temp, double max_disp,
 
     for (int t = 0; t < nsteps; ++t) {
         step();
-        // print positions inside the loop if wanted
-        if (print_mid_pos) {
+        // print positions and energy every nsample tsteps
+        if (print_mid_pos && t % nsample == 0) {
             print_pos(pos_file);
-        }
-        // print energy every 50 timesteps
-        if (print_energy && t % 50 == 0) {
-            U = potential_full();
-            print_ene(ene_file);
+            if (print_energy) {
+                U = potential_full();
+                print_ene(ene_file);
+            }
         }
     }
 
@@ -58,8 +57,8 @@ void System::evolve(int nsteps, double temp, double max_disp,
         print_pos(pos_file);
     }
 
-    std::cout << "Acceptance rate: " << 1 - double(nrej) / (N * nsteps)
-              << std::endl;
+    double arate = 1 - double(nrej) / (N * nsteps);
+    std::cout << "Acceptance rate: " << arate << std::endl;
 }
 
 /*

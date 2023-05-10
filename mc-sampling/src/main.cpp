@@ -5,9 +5,9 @@
 #include <string>
 
 int main(int argc, const char* argv[]) {
-    if (argc != 8) {
+    if (argc != 9) {
         std::cerr << "Usage: ./main [output file prefix] "
-                  << "[N] [L] [gamma] [T] [Nt] [dr]\n";
+                  << "[N] [L] [gamma] [T] [Nt] [Ns] [dr]\n";
         return -1;
     }
 
@@ -32,11 +32,12 @@ int main(int argc, const char* argv[]) {
 
     double temp = std::atof(argv[5]);
     int nsteps = std::atoi(argv[6]);
-    double dr = std::atof(argv[7]);
+    int nsample = std::atoi(argv[7]);
+    double dr = std::atof(argv[8]);
 
     std::stringstream params;
     params << "_" << N << "_" << side << "_" << gamma << "_" << temp << "_"
-           << nsteps << "_" << dr;
+           << nsteps << "_" << nsample << "_" << dr;
     prefix += params.str();
 
     std::FILE* pos_file
@@ -46,8 +47,8 @@ int main(int argc, const char* argv[]) {
     // start system and evolve
     System sys(N, side, gamma);
     // last two arguments decide whether to print energy and positions
-    // at every timestep
-    sys.evolve(nsteps, temp, dr, pos_file, ene_file, true, true);
+    // every 'nsample' timesteps
+    sys.evolve(nsteps, nsample, temp, dr, pos_file, ene_file, true, true);
 
     // close out files
     std::fclose(pos_file);
