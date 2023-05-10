@@ -7,7 +7,7 @@ niter <- 10000
 fname <- list.files(
     path = "../dump", pattern = "*_U.txt", full.names = TRUE
 )
-potential <- scan(file = fname, n = niter, sep = "\n")
+potential <- scan(file = fname, sep = "\n")
 
 tibble(iter = seq_along(potential)[-1], pot = potential[-1]) |>
     ggplot(aes(x = iter, y = pot)) +

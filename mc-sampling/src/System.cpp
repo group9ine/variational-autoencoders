@@ -118,6 +118,8 @@ void System::kick(int k) {
             x[k][j] = kick + L;
         } else if (kick > L) {
             x[k][j] = kick - L;
+        } else {
+            x[k][j] = kick;
         }
     }
 
