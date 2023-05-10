@@ -1,5 +1,7 @@
 #include "System.h"
+#include <chrono>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 
 #define CHUNK_SIZE 4096
@@ -40,9 +42,19 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
     T = temp;
     dr = max_disp;
 
-    for (int t = 0; t < nsteps; ++t) {
+    // define time instants for elapsed time estimation
+    auto begin = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> t_step = end - begin;
+    double mins_left; // minutes left in the simulation
+    
+    // get number of digits of nsteps for printing
+    int dig = floor(1 + log10(nsteps));
+
+    for (int t = 1; t <= nsteps; ++t) {
+        begin = std::chrono::high_resolution_clock::now();
+
         step();
-        // print positions and energy every nsample tsteps
         if (print_mid_pos && t % nsample == 0) {
             print_pos(pos_file);
             if (print_energy) {
@@ -50,12 +62,23 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
                 print_ene(ene_file);
             }
         }
+
+        end = std::chrono::high_resolution_clock::now();
+
+        // running average of elapsed time
+        t_step += (end - begin - t_step) / t;
+        mins_left = (t_step * (nsteps - t) / 60).count();
+
+        // print time indications
+        std::cout << "Iter. [" << std::setw(dig) << t << "]\t"
+                  << "Time remaining: " << std::setw(4)
+                  << (int)(mins_left) << " m " << std::setw(2)
+                  << (int)((mins_left - (int)(mins_left)) * 60)
+                  << " s\r" << std::flush;
     }
 
-    // if we don't middle positions, print at least the final one
-    if (!print_mid_pos) {
-        print_pos(pos_file);
-    }
+    // print final position
+    print_pos(pos_file);
 
     double arate = 1 - double(nrej) / (N * nsteps);
     std::cout << "Acceptance rate: " << arate << std::endl;
