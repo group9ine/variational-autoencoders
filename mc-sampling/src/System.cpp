@@ -114,7 +114,11 @@ void System::kick(int k) {
         x_old[j] = x[k][j];
         kick = x_old[j] + dr * (2 * runif(gen) - 1); // btw -dr and +dr
         // periodic boundary conditions
-        x[k][j] = kick > 0 ? kick - L : kick + L;
+        if (kick < 0) {
+            x[k][j] = kick + L;
+        } else if (kick > L) {
+            x[k][j] = kick - L;
+        }
     }
 
     // in z we want to bounce on the floor
