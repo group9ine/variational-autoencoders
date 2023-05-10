@@ -81,7 +81,7 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
     print_pos(pos_file);
 
     double arate = 1 - double(nrej) / (N * nsteps);
-    std::cout << "Acceptance rate: " << arate << std::endl;
+    std::cout << "\nAcceptance rate: " << arate << std::endl;
 }
 
 /*
