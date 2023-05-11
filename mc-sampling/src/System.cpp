@@ -54,7 +54,7 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
     // add newline to energy file
     if (print_energy) {
         char nl[] = {'\n'};
-        std::fwrite(nl, 1, 1, ene_file); 
+        std::fwrite(nl, 1, 1, ene_file);
     }
 
     double arate = 1 - double(nrej) / (N * nsteps);
