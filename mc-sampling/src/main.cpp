@@ -5,20 +5,63 @@
 #include <string>
 
 int main(int argc, const char* argv[]) {
-    if (argc != 9) {
-        std::cerr << "Usage: ./main [output file prefix] "
-                  << "[N] [L] [gamma] [T] [Nt] [Ns] [dr]\n";
+    if (argc != 2) {
+        std::cout << "Usage: ./main [config file]\n";
         return -1;
     }
 
-    // read parameters
-    std::string prefix = argv[1];
-    int N = std::atoi(argv[2]);
-    double side = std::atof(argv[3]);
-    double gamma = std::atof(argv[4]);
+    // define variables to hold the config parameters
+    std::string prefix;
+    int n_parts, n_systems, n_steps, n_sample;
+    double side, gamma, temp, max_disp;
+
+    // read config from file
+    std::ifstream cfg(argv[1]);
+    std::string line;
+    int line_cnt = 0;
+    while (std::getline(cfg, line)) {
+        // skip comments and empty lines
+        if (line.empty() || line[0] == '#') {
+            continue;
+        }
+
+        line_cnt += 1;
+
+        // split line into key + value
+        std::istringstream iss(line);
+        std::string key, value;
+        std::getline(iss, key, '=');
+        std::getline(iss, value);
+
+        // parse the value depending on the key
+        if (key == "prefix") {
+            prefix = value;
+        } else if (key == "n_parts") {
+            n_parts = std::stoi(value);
+        } else if (key == "side") {
+            side = std::stod(value);
+        } else if (key == "gamma") {
+            gamma = std::stod(value);
+        } else if (key == "temp") {
+            temp = std::stod(value);
+        } else if (key == "max_disp") {
+            max_disp = std::stod(value);
+        } else if (key == "n_systems") {
+            n_systems = std::stoi(value);
+        } else if (key == "n_steps") {
+            n_steps = std::stoi(value);
+        } else if (key == "n_sample") {
+            n_sample = std::stoi(value);
+        }
+    }
+
+    if (line_cnt != 9) {
+        std::cout << "Error in configuration file! Missing parameters\n";
+        return -1;
+    }
 
     // particles per side if they were in a cubic lattice
-    int n = int(ceil(pow(double(N), 1.0 / 3)));
+    int n = int(ceil(pow(double(n_parts), 1.0 / DIM)));
     if (side / n < 1) {
         std::cerr << "Oh, look who's caused another issue.\n"
                   << "Surprise, surprise. If you could just take a\n"
@@ -30,25 +73,27 @@ int main(int argc, const char* argv[]) {
                   << "do your job.\n\n";
     }
 
-    double temp = std::atof(argv[5]);
-    int nsteps = std::atoi(argv[6]);
-    int nsample = std::atoi(argv[7]);
-    double dr = std::atof(argv[8]);
-
+    // add config parameters to file prefixes
     std::stringstream params;
-    params << "_" << N << "_" << side << "_" << gamma << "_" << temp << "_"
-           << nsteps << "_" << nsample << "_" << dr;
+    params << "_" << n_parts << "_" << side << "_" << gamma << "_" << temp
+           << "_" << max_disp << "_" << n_systems << "_" << n_steps << "_"
+           << n_sample;
     prefix += params.str();
 
+    // position and energy files (in append mode to handle all the
+    // different generated systems)
     std::FILE* pos_file
-        = std::fopen(("dump/" + prefix + "_x.txt").c_str(), "w");
+        = std::fopen(("dump/" + prefix + "_x.txt").c_str(), "a");
     std::FILE* ene_file
-        = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "w");
+        = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "a");
+
     // start system and evolve
-    System sys(N, side, gamma);
-    // last two arguments decide whether to print energy and positions
-    // every 'nsample' timesteps
-    sys.evolve(nsteps, nsample, temp, dr, pos_file, ene_file, true, true);
+    System sys(n_parts, side, gamma);
+    for (n = 0; n < n_systems; ++n) {
+        sys.init_config(); // reset positions
+        sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
+                   true);
+    }
 
     // close out files
     std::fclose(pos_file);
