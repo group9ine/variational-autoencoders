@@ -1,16 +1,17 @@
 from math import ceil
 import numpy as np
 
-def scan(xyz, *args):
+def scan(xyz, *args, **kwargs):
     if len(args)>=3:
         x=args[0]
         y=args[1]
         z=args[2]
     else:
+        #print(args, len(args), kwargs)
         x=ceil(max([i[0] for i in xyz]))
         y=ceil(max([i[1] for i in xyz]))
         z=ceil(max([i[2] for i in xyz]))
-    print(x,y,z)
+    #print(x,y,z)
     res=np.zeros(shape=(z*10, y*10, x*10), dtype=int)
     #[[[[0 for i in range(x*10)]for j in range(y*10)]for k in range(z*10)]for h in range(len(data))]
     

@@ -11,7 +11,7 @@ class Sampling(layers.Layer):
         z_mean, z_log_var = inputs
         batch = tf.shape(z_mean)[0]
         dim = tf.shape(z_mean)[1]
-        epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
+        epsilon = keras.backend.random_normal(shape=(batch, dim))
         return z_mean + tf.exp(0.5 * z_log_var) * epsilon
 
 
@@ -36,7 +36,7 @@ encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder")
 latent_inputs = keras.Input(shape=(latent_dim,))
 x = layers.Dense(125)(latent_inputs)
 x = layers.Reshape((1,5,5,5))(x)
-x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(encoder_inputs)
+x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
 x = layers.UpSampling3D((2,2,2), data_format="channels_first")(x)
 x = layers.Conv3D(1,3, activation="relu", padding="same", data_format="channels_first")(x)
 x = layers.UpSampling3D((2,2,2), data_format="channels_first")(x)
@@ -72,7 +72,7 @@ class VAE(keras.Model):
             reconstruction = self.decoder(z)
             reconstruction_loss = tf.reduce_mean(keras.losses.mean_squared_error(data, reconstruction))
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
-            kl_loss = tf.reduce_mean(kl_loss1)
+            kl_loss = tf.reduce_mean(kl_loss)
             total_loss = reconstruction_loss + l*kl_loss
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
@@ -98,13 +98,14 @@ if __name__=="__main__":
         del data
     
     # print(len(data), [len(data[i]) for i in range(len(data))])
-    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint("./checkpoints", save_best_only=True)
+    model_checkpoint_callback = keras.callbacks.ModelCheckpoint("./checkpoints", save_best_only=True)
     
     if len(argv)>2 and argv[2]=="--resume":
-        vae=keras.models.load_model()
+        vae=keras.models.load_model("./model_info/")
     else:
         vae = VAE(encoder, decoder)
     vae.compile(optimizer=keras.optimizers.Adam())
+    
     
     for i in range(ceil(len(xyz)/batch_len)):
         bdata = [] # will hold bucketed data version
@@ -112,7 +113,7 @@ if __name__=="__main__":
             if j>len(xyz):
                 break
             #print(xyz[j])
-            bdata.append(scan([xyz[j],4,4,4]))
+            bdata.append(scan(xyz[j],4,4,4))
         vae.fit(bdata, epochs=30, batch_size=128, callbacks=[model_checkpoint_callback])
     
     vae.load_weights("./checkpoints")
