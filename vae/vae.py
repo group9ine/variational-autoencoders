@@ -113,7 +113,7 @@ if __name__=="__main__":
             if j>len(xyz):
                 break
             #print(xyz[j])
-            bdata.append(scan(xyz[j],4,4,4))
+            bdata.append([scan(xyz[j],4,4,4)])
         vae.fit(bdata, epochs=30, batch_size=128, callbacks=[model_checkpoint_callback])
     
     vae.load_weights("./checkpoints")
