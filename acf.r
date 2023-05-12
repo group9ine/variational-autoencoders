@@ -1,5 +1,5 @@
 acf <- function(data, h) {
- sum(data[(h+1):length(data[,1]),]*data[1:(length(data[,1])-h),])/(90*(length(data[,1])-h))
+ mean(data[(h+1):length(data[,1]),]*data[1:(length(data[,1])-h),])
 }
 
 get_correls <- function(data, step=100, stop=NA) {
