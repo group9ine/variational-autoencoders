@@ -68,7 +68,7 @@ class VAE(keras.Model):
             kl_loss = -0.5 * (
                 1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var)
             )
-            kl_loss = tf.reduce_mean(kl_loss1)
+            kl_loss = tf.reduce_mean(kl_loss)
             total_loss = reconstruction_loss + l * kl_loss
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
