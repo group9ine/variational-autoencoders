@@ -134,3 +134,4 @@ dmypy.json
 # mc-sampling files
 mc-sampling/main
 mc-sampling/src/*.o
+mc-sampling/dump
