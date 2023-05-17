@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -pedantic-errors -O3
+CXXFLAGS = -Wall -Wextra -pedantic-errors -Wno-maybe-uninitialized -O3
 
 main: src/main.o src/System.o
 	${CXX} ${CXXFLAGS} src/main.o src/System.o -o main
