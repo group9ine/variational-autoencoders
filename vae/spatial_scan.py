@@ -43,7 +43,7 @@ def deploy(s, *args, **kwargs):
     n = kwargs["dim"] if "dim" in kwargs.keys() else 3
     lims = [0 for i in range(n)] 
     for i in range(n):
-        lims[i]=len(s[tuple([0 for j in range(i+1)])])
+        lims[n-i-1]=len(s[tuple([0 for j in range(i+1)])])
     
     
     #print("limits are: ", lims)
@@ -53,8 +53,10 @@ def deploy(s, *args, **kwargs):
     mesh=np.meshgrid(*[[i for i in range(lims[j])] for j in range(n)])
     indexes=np.reshape(mesh, (n,np.prod(lims)))
     for ind in zip(*indexes):
-        grid[tuple(reversed(ind))]=tuple([0.05+i/10 for i in ind]) if s[0][tuple(reversed(ind))] else tuple([None for i in ind])
-    
+        try:
+            grid[tuple(reversed(ind))]=tuple([0.05+i/10 for i in ind]) if s[0][tuple(reversed(ind))] else tuple([None for i in ind])
+        except:
+            print(tuple(reversed(ind)), grid.shape,s[0].shape) 
     grid=np.reshape(grid,(np.prod(lims),n))
     #x=[grid[i][0] for i in range(len(grid)) if grid[i][0] is not None]
     #y=[grid[i][1] for i in range(len(grid)) if grid[i][1] is not None]
