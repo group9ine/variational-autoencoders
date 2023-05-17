@@ -67,6 +67,7 @@ class VAE(keras.Model):
         ]
 
     def train_step(self, data):
+        global l
         with tf.GradientTape() as tape:
             z_mean, z_log_var, z = self.encoder(data)
             reconstruction = self.decoder(z)
