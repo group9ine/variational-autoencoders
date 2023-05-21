@@ -83,27 +83,13 @@ void System::step() {
 
 void System::kick(int k) {
     double x_new;
-    for (int j = 0; j < (DIM - 1); ++j) {
+    for (int j = 0; j < DIM; ++j) {
         x_old[j] = x[k][j];
         x_new = x_old[j] + dr * (2 * runif(gen) - 1); // btw -dr and +dr
-        // periodic boundary conditions
-        x[k][j] = x_new - L * floor(x_new / L);
+        if (0 < x_new && x_new < L) {
+            x[k][j] = x_new;
+        } // else keep the old position (~ bounce back)
     }
-
-    // in z we want to bounce on the floor and ceiling
-    x_old[DIM - 1] = x[k][DIM - 1];
-    x_new = x_old[DIM - 1] + dr * (2 * runif(gen) - 1);
-    if (0 < x_new && x_new < L) {
-        x[k][DIM - 1] = x_new;
-    } // else keep the old position (~ bounce back)
-
-    // if (x_new < 0) {
-    //     x[k][DIM - 1] = -x_new;
-    // } else if (x_new > L) {
-    //     x[k][DIM - 1] = 2 * L - x_new;
-    // } else {
-    //     x[k][DIM - 1] = x_new;
-    // }
 }
 
 double System::potential_one(int k) const {
@@ -120,9 +106,6 @@ double System::potential_one(int k) const {
             r2 = 0.0;
             for (int j = 0; j < DIM; ++j) {
                 r = x[i][j] - x[k][j];
-                // minimum image convention: if r > L / 2
-                // pick the first neighbour's replica
-                r -= L * round(r / L);
                 r2 += r * r;
             }
 
@@ -151,9 +134,6 @@ double System::potential_full() const {
             r2 = 0.0;
             for (int k = 0; k < DIM; ++k) {
                 r = x[i][k] - x[j][k];
-                // minimum image convention: if r > L / 2
-                // pick the first neighbour's replica
-                r -= L * round(r / L);
                 r2 += r * r;
             }
 
