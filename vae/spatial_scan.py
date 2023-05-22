@@ -31,7 +31,7 @@ def scan(xyz, *args, **kwargs):
             print(r)
             print(e)
     #print("bucketed")
-    return res
+    return res*100-1
 
 def deploy(s, *args, **kwargs):
     if type(s) == list:
