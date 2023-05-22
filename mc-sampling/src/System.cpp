@@ -5,8 +5,7 @@
 
 #define CHUNK_SIZE 4096
 
-System::System(int npart, double side, double g)
-    : N(npart), L(side), gamma(g) {
+System::System(int npart, double side) : N(npart), L(side) {
     x = new double*[N];
     for (int i = 0; i < N; ++i) {
         x[i] = new double[DIM];

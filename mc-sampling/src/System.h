@@ -8,7 +8,7 @@
 
 class System {
 public:
-    System(int npart, double side, double g); // constructor
+    System(int npart, double side); // constructor
 
     // assignment stuff
     System(const System& x) = delete;
@@ -24,7 +24,6 @@ public:
 private:
     int N;
     double L;          // box side
-    double gamma;      // mu * g * sigma / epsilon (adimensional)
     double T;          // temperature
     double** x;        // positions array
     double x_old[DIM]; // array to store old position of kicked particle

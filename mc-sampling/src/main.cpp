@@ -19,7 +19,7 @@ int main(int argc, const char* argv[]) {
     // define variables to hold the config parameters
     std::string prefix;
     int n_parts, n_systems, n_steps, n_sample;
-    double side, gamma, temp, max_disp;
+    double side, temp, max_disp;
     bool print_en;
 
     // read config from file
@@ -47,8 +47,6 @@ int main(int argc, const char* argv[]) {
             n_parts = std::stoi(value);
         } else if (key == "side") {
             side = std::stod(value);
-        } else if (key == "gamma") {
-            gamma = std::stod(value);
         } else if (key == "temp") {
             temp = std::stod(value);
         } else if (key == "max_disp") {
@@ -64,7 +62,7 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    if (line_cnt != 10) {
+    if (line_cnt != 9) {
         std::cout
             << "Error in configuration file! Wrong number of parameters\n";
         return -1;
@@ -85,8 +83,8 @@ int main(int argc, const char* argv[]) {
 
     // add config parameters to file prefixes
     std::stringstream params;
-    params << "_" << n_parts << "_" << side << "_" << gamma << "_" << temp
-           << "_" << max_disp << "_" << n_systems << "_" << n_steps << "_"
+    params << "_" << n_parts << "_" << side << "_" << temp << "_"
+           << max_disp << "_" << n_systems << "_" << n_steps << "_"
            << n_sample;
     prefix += params.str();
 
@@ -98,7 +96,7 @@ int main(int argc, const char* argv[]) {
         = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "a");
 
     // start system and evolve
-    System sys(n_parts, side, gamma);
+    System sys(n_parts, side);
     for (n = 0; n < n_systems; ++n) {
         sys.init_config(); // reset positions
         sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
