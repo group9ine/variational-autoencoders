@@ -19,7 +19,7 @@ public:
     void init_config();
     void evolve(int nsteps, int nsample, double temp, double max_disp,
                 std::FILE* pos_file, std::FILE* ene_file,
-                bool print_energy);
+                bool print_energy, bool show_z);
 
 private:
     int N;
