@@ -20,7 +20,7 @@ int main(int argc, const char* argv[]) {
     std::string prefix;
     int n_parts, n_systems, n_steps, n_sample;
     double side, gamma, temp, max_disp;
-    bool print_en, show_z;
+    bool print_en;
 
     // read config from file
     std::ifstream cfg(argv[1]);
@@ -59,14 +59,12 @@ int main(int argc, const char* argv[]) {
             n_steps = std::stoi(value);
         } else if (key == "n_sample") {
             n_sample = std::stoi(value);
-        } else if (key == "print_energy") {
+        } else if (key == "print_en") {
             print_en = (value == "true") ? true : false;
-        } else if (key == "show_z") {
-            show_z = (value == "true") ? true : false;
         }
     }
 
-    if (line_cnt != 11) {
+    if (line_cnt != 10) {
         std::cout
             << "Error in configuration file! Wrong number of parameters\n";
         return -1;
@@ -104,7 +102,7 @@ int main(int argc, const char* argv[]) {
     for (n = 0; n < n_systems; ++n) {
         sys.init_config(); // reset positions
         sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
-                   print_en, show_z);
+                   print_en);
     }
 
     // close out files
