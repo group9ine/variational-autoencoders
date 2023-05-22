@@ -42,7 +42,7 @@ x = layers.Conv3D(1,3, activation="relu", padding="same")(x)
 x = layers.UpSampling3D((5,5,5))(x)
 x = layers.Conv3D(1,3, activation="relu", padding="same")(x)
 #x = layers.UpSampling3D((2,2,2))(x)
-decoder_outputs = layers.Conv3D(1,3, activation="relu", padding="same")(x)
+decoder_outputs = layers.Conv3D(1,3, padding="same")(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 #decoder.summary()
 
