@@ -42,7 +42,7 @@ x = layers.Conv2D(1,3, activation="relu", padding="same")(x)
 x = layers.UpSampling2D((5,5))(x)
 x = layers.Conv2D(1,3, activation="relu", padding="same")(x)
 #x = layers.UpSampling2D((2,2,2))(x)
-decoder_outputs = layers.Conv2D(1,3, activation="relu", padding="same")(x)
+decoder_outputs = layers.Conv2D(1,3, activation="softmax", padding="same")(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 #decoder.summary()
 

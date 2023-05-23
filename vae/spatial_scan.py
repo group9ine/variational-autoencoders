@@ -31,8 +31,9 @@ def scan(xyz, *args, **kwargs):
             print(r)
             print(e)
     #print("bucketed")
-    m = kwargs["mult"] if "mult" in kwargs.keys() else 10
-    return m*(res-1/np.prod(lims))
+    # m = kwargs["mult"] if "mult" in kwargs.keys() else 10
+    # return m*(res-1/np.prod(lims))
+    return res
 
 def deploy(s, *args, **kwargs):
     if type(s) == list:
@@ -46,8 +47,9 @@ def deploy(s, *args, **kwargs):
     for i in range(n):
         lims[n-i-1]=len(s[tuple([0 for j in range(i+1)])])
     
-    m = kwargs["mult"] if "mult" in kwargs.keys() else 10
-    s=np.int64(2*(s+1/np.prod(lims))/m)
+    #m = kwargs["mult"] if "mult" in kwargs.keys() else 10
+    #s=np.int64(2*(s+1/np.prod(lims))/m)
+    s=np.int64(s>s.mean())
     
     #print("limits are: ", lims)
     #grid=[[[(i/10, j/10, k/10) if s[0][k][j][i] else (None, None, None) for i in range(x)] for j in range(y)] for k in range(z)]
