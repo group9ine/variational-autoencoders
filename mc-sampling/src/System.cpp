@@ -52,7 +52,7 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
     if (show_z) {
         double avg_z = 0.0;
         for (int i = 0; i < N; ++i) {
-            avg_z += x[N][DIM - 1];
+            avg_z += x[i][DIM - 1];
         }
         avg_z /= (N * L);
         std::cout << "Average z / L: " << avg_z << "\t\t";
