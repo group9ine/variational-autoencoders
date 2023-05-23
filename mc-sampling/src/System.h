@@ -4,7 +4,7 @@
 #include <fstream>
 #include <random>
 
-#define DIM 3
+#define DIM 2
 
 class System {
 public:
