@@ -109,7 +109,7 @@ double System::potential_one(int k) const {
     double r2, sr6;
 
     // start with gravitational potential
-    double pot = gamma * x[DIM - 1][k];
+    double pot = gamma * x[k][DIM - 1];
     // loop over all other particles
     for (int i = 0; i < N; ++i) {
         if (i != k) {
