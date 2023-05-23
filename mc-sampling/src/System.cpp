@@ -11,11 +11,6 @@ System::System(int npart, double side, double g)
     for (int i = 0; i < N; ++i) {
         x[i] = new double[DIM];
     }
-
-    // set up random number generator
-    std::random_device rd;
-    gen = std::mt19937(rd());
-    runif = std::uniform_real_distribution<double>(0, 1);
 }
 
 System::~System() {
@@ -27,6 +22,12 @@ System::~System() {
 
 void System::init_config() {
     nrej = 0; // reset rejection counter
+
+    // set up random number generator
+    std::random_device rd;
+    gen = std::mt19937(rd());
+    runif = std::uniform_real_distribution<double>(0, 1);
+
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < DIM; ++j) {
             x[i][j] = L * runif(gen); // generate btw 0 and L
