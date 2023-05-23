@@ -5,7 +5,8 @@
 
 #define CHUNK_SIZE 4096
 
-System::System(int npart, double side) : N(npart), L(side) {
+System::System(int npart, double side, double g)
+    : N(npart), L(side), gamma(g) {
     x = new double*[N];
     for (int i = 0; i < N; ++i) {
         x[i] = new double[DIM];
@@ -35,17 +36,26 @@ void System::init_config() {
 
 void System::evolve(int nsteps, int nsample, double temp, double max_disp,
                     std::FILE* pos_file, std::FILE* ene_file,
-                    bool print_energy) {
+                    bool print_energy, bool show_z) {
     T = temp;
     dr = max_disp;
 
     for (int t = 1; t <= nsteps; ++t) {
         step();
-
         if (print_energy && t % nsample == 0) {
             U = potential_full();
             print_ene(ene_file);
         }
+    }
+
+    // print average final z if requested
+    if (show_z) {
+        double avg_z = 0.0;
+        for (int i = 0; i < N; ++i) {
+            avg_z += x[N][DIM - 1];
+        }
+        avg_z /= (N * L);
+        std::cout << "Average z / L: " << avg_z << "\t\t";
     }
 
     // print final position
@@ -98,7 +108,8 @@ double System::potential_one(int k) const {
     // sq. mod. of r and 1/r^6
     double r2, sr6;
 
-    double pot = 0.0;
+    // start with gravitational potential
+    double pot = gamma * x[DIM - 1][k];
     // loop over all other particles
     for (int i = 0; i < N; ++i) {
         if (i != k) {
@@ -127,6 +138,8 @@ double System::potential_full() const {
 
     double pot = 0.0;
     for (int i = 0; i < (N - 1); ++i) {
+        // add gravitational part
+        pot += gamma * x[i][DIM - 1];
         for (int j = i + 1; j < N; ++j) {
             r2 = 0.0;
             for (int k = 0; k < DIM; ++k) {
@@ -141,6 +154,9 @@ double System::potential_full() const {
             }
         }
     }
+
+    // add last particle's gravitational pot
+    pot += gamma * x[N - 1][DIM - 1];
 
     return pot;
 }

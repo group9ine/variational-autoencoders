@@ -19,8 +19,8 @@ int main(int argc, const char* argv[]) {
     // define variables to hold the config parameters
     std::string prefix;
     int n_parts, n_systems, n_steps, n_sample;
-    double side, temp, max_disp;
-    bool print_en;
+    double side, gamma, temp, max_disp;
+    bool print_en, show_z;
 
     // read config from file
     std::ifstream cfg(argv[1]);
@@ -47,6 +47,8 @@ int main(int argc, const char* argv[]) {
             n_parts = std::stoi(value);
         } else if (key == "side") {
             side = std::stod(value);
+        } else if (key == "gamma") {
+            gamma = std::stod(value);
         } else if (key == "temp") {
             temp = std::stod(value);
         } else if (key == "max_disp") {
@@ -59,10 +61,12 @@ int main(int argc, const char* argv[]) {
             n_sample = std::stoi(value);
         } else if (key == "print_en") {
             print_en = (value == "true") ? true : false;
+        } else if (key == "show_z") {
+            show_z = (value == "true") ? true : false;
         }
     }
 
-    if (line_cnt != 9) {
+    if (line_cnt != 11) {
         std::cout
             << "Error in configuration file! Wrong number of parameters\n";
         return -1;
@@ -83,8 +87,8 @@ int main(int argc, const char* argv[]) {
 
     // add config parameters to file prefixes
     std::stringstream params;
-    params << "_" << n_parts << "_" << side << "_" << temp << "_"
-           << max_disp << "_" << n_systems << "_" << n_steps << "_"
+    params << "_" << n_parts << "_" << side << "_" << gamma << "_" << temp
+           << "_" << max_disp << "_" << n_systems << "_" << n_steps << "_"
            << n_sample;
     prefix += params.str();
 
@@ -96,11 +100,11 @@ int main(int argc, const char* argv[]) {
         = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "a");
 
     // start system and evolve
-    System sys(n_parts, side);
+    System sys(n_parts, side, gamma);
     for (n = 0; n < n_systems; ++n) {
         sys.init_config(); // reset positions
         sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
-                   print_en);
+                   print_en, show_z);
     }
 
     // close out files
