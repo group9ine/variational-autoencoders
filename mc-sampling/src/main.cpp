@@ -115,7 +115,7 @@ int main(int argc, const char* argv[]) {
         middle = std::chrono::high_resolution_clock::now();
 
         sys.init_config(); // reset positions
-        sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
+        sys.evolve(n_systems, n_steps, n_sample, temp, max_disp, pos_file, ene_file,
                    print_en, show_z);
 
         // running average of elapsed time
