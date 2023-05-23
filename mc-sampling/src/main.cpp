@@ -1,4 +1,5 @@
 #include "System.h"
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
@@ -99,12 +100,34 @@ int main(int argc, const char* argv[]) {
     std::FILE* ene_file
         = std::fopen(("dump/" + prefix + "_U.txt").c_str(), "a");
 
+    // define timers
+    auto begin = std::chrono::high_resolution_clock::now();
+    auto middle = std::chrono::high_resolution_clock::now();
+    auto end = std::chrono::high_resolution_clock::now();
+    // length of one step in the n_systems loop
+    std::chrono::duration<double> t_step = end - begin;
+    double mins_left;
+
     // start system and evolve
     System sys(n_parts, side, gamma);
     for (n = 0; n < n_systems; ++n) {
+        begin = middle;
+        middle = std::chrono::high_resolution_clock::now();
+
         sys.init_config(); // reset positions
         sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
                    print_en, show_z);
+
+        // running average of elapsed time
+        t_step = t_step + (end - begin - t_step) / (n + 1);
+        mins_left = (t_step * (n_systems - n) / 60).count();
+        // print out remaining time
+        std::cout << "\tTime left: " << std::setw(4)
+                  << (int)(mins_left) << " m " << std::setw(2)
+                  << (int)((mins_left - (int)(mins_left)) * 60)
+                  << " s\r" << std::flush;
+
+        end = std::chrono::high_resolution_clock::now();
     }
 
     // close out files

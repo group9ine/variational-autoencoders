@@ -1,6 +1,5 @@
 #include "System.h"
 #include <cmath>
-#include <iomanip>
 #include <iostream>
 
 #define CHUNK_SIZE 4096
@@ -56,7 +55,7 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
             avg_z += x[i][DIM - 1];
         }
         avg_z /= (N * L);
-        std::cout << "Average z / L: " << avg_z << "\t\t";
+        std::cout << "Avg. z / L: " << avg_z << "\t";
     }
 
     // print final position
@@ -69,7 +68,7 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
     }
 
     double arate = 1 - double(nrej) / (N * nsteps);
-    std::cout << "Acceptance rate: " << arate << "\r" << std::flush;
+    std::cout << "Acc. rate: " << arate;
 }
 
 void System::step() {

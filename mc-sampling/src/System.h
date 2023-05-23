@@ -2,6 +2,7 @@
 #define _SYSTEM_INCLUDED_
 
 #include <fstream>
+#include <iomanip>
 #include <random>
 
 #define DIM 2
