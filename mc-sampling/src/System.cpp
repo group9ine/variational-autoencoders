@@ -34,9 +34,9 @@ void System::init_config() {
     }
 }
 
-void System::evolve(int nsteps, int nsample, double temp, double max_disp,
-                    std::FILE* pos_file, std::FILE* ene_file,
-                    bool print_energy, bool show_z) {
+void System::evolve(int nsysts, int nsteps, int nsample, double temp,
+                    double max_disp, std::FILE* pos_file,
+                    std::FILE* ene_file, bool print_energy, bool show_z) {
     T = temp;
     dr = max_disp;
 
@@ -45,6 +45,10 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
         if (print_energy && t % nsample == 0) {
             U = potential_full();
             print_ene(ene_file);
+
+            if (nsysts == 1) {       // print position every nsample
+                print_pos(pos_file); // only if there is only one system
+            }
         }
     }
 
@@ -58,8 +62,10 @@ void System::evolve(int nsteps, int nsample, double temp, double max_disp,
         std::cout << "Avg. z / L: " << avg_z << "\t";
     }
 
-    // print final position
-    print_pos(pos_file);
+    if (nsysts > 1) {
+        // print final position
+        print_pos(pos_file);
+    }
 
     // add newline to energy file
     if (print_energy) {
