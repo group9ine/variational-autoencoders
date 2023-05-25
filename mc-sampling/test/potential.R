@@ -9,7 +9,7 @@ fname <- list.files(
 
 potential <- scan(file = fname) |> matrix(nrow = 10000, ncol = 100)
 
-pot_plt <- potential[, 80]
+pot_plt <- potential[, 20]
 tibble(iter = seq_along(pot_plt), pot = pot_plt) |>
     ggplot(aes(x = iter, y = pot)) +
         geom_point(size = 0.6, colour = "gray40", alpha = 0.5) +

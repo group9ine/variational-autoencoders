@@ -115,17 +115,17 @@ int main(int argc, const char* argv[]) {
         middle = std::chrono::high_resolution_clock::now();
 
         sys.init_config(); // reset positions
-        sys.evolve(n_steps, n_sample, temp, max_disp, pos_file, ene_file,
-                   print_en, show_z);
+        sys.evolve(n_systems, n_steps, n_sample, temp, max_disp, pos_file,
+                   ene_file, print_en, show_z);
 
         // running average of elapsed time
         t_step = t_step + (end - begin - t_step) / (n + 1);
         mins_left = (t_step * (n_systems - n) / 60).count();
         // print out remaining time
-        std::cout << "\tTime left: " << std::setw(4)
-                  << (int)(mins_left) << " m " << std::setw(2)
-                  << (int)((mins_left - (int)(mins_left)) * 60)
-                  << " s\r" << std::flush;
+        std::cout << "\tTime left: " << std::setw(4) << (int)(mins_left)
+                  << " m " << std::setw(2)
+                  << (int)((mins_left - (int)(mins_left)) * 60) << " s\r"
+                  << std::flush;
 
         end = std::chrono::high_resolution_clock::now();
     }
