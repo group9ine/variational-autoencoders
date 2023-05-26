@@ -97,8 +97,13 @@ def rand_deploy(s, *args, **kwargs):
     
     grid = [[0 for i in range(N)] for j in range(n)]
     exts = np.random.uniform(size=(N,))
+    inds = [-1 for i in range(N)]
     for i in range(N):
         ind = list(s>exts[i]).index(True)
+        while ind in inds:
+            u = np.random.uniform()
+            ind = list(s>u).index(True)
+        inds[i] = ind
         pos = [ind for j in range(n)]
         #print("lims: ", lims, "; ind: ", ind)
         for j in range(n):
