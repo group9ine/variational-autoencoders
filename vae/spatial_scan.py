@@ -4,12 +4,14 @@ import numpy as np
 def scan(xyz, *args, **kwargs):
     n = kwargs["dim"] if "dim" in kwargs.keys() else 3
     lims = [0 for i in range(n)] 
+    w = [0 for i in range(n)] 
     if len(args)>=n:
         #x=args[0]
         #y=args[1]
         #z=args[2]
         for i in range(n):
             lims[i]=args[i]
+            w[i]=ceil(max([j[i] for j in xyz]))
     else:
         #print(args, len(args), kwargs)
         #x=ceil(max([i[0] for i in xyz]))
@@ -17,6 +19,8 @@ def scan(xyz, *args, **kwargs):
         #z=ceil(max([i[2] for i in xyz]))
         for i in range(n):
             lims[i]=ceil(max([j[i] for j in xyz]))
+            w[i]=lims[i]
+            
     #print(x,y,z)
     #res=np.zeros(shape=(z*10, y*10, x*10), dtype=int)
     res=np.zeros(shape=tuple([i*10 for i in lims]), dtype=int)
@@ -26,7 +30,7 @@ def scan(xyz, *args, **kwargs):
     for r in xyz:
         try:
             #res[int(r[2]*10)][int(r[1]*10)][int(r[0]*10)]+=1
-            res[tuple([int(r[i]*10) for i in reversed(range(n))])]+=1
+            res[tuple([int(r[i]*10*lims[i]/w[i]) for i in reversed(range(n))])]+=1
         except Exception as e:
             print(r)
             print(e)
@@ -43,13 +47,20 @@ def deploy(s, *args, **kwargs):
     #x=len(s[0][0][0])
     
     n = kwargs["dim"] if "dim" in kwargs.keys() else 3
+    N = kwargs["N"] if "N" in kwargs.keys() else 30
+    
     lims = [0 for i in range(n)] 
     for i in range(n):
         lims[n-i-1]=len(s[tuple([0 for j in range(i+1)])])
     
     #m = kwargs["mult"] if "mult" in kwargs.keys() else 10
     #s=np.int64(2*(s+1/np.prod(lims))/m)
-    s=np.int64(s>s.mean())
+    
+    if(s.std()==0):
+        print("all same")
+        return tuple([[] for i in range(n)])
+    
+    s=np.int64(s>s.mean()+5*(s[np.logical_and(s>s.mean()-s.std(),s<s.mean()+s.std())]).std())
     
     #print("limits are: ", lims)
     #grid=[[[(i/10, j/10, k/10) if s[0][k][j][i] else (None, None, None) for i in range(x)] for j in range(y)] for k in range(z)]
@@ -69,10 +80,39 @@ def deploy(s, *args, **kwargs):
     #return x,y,z
     return tuple([[grid[i][j] for i in range(len(grid)) if not np.isnan(grid[i][j])] for j in range(n)])
 
+def rand_deploy(s, *args, **kwargs):
+    if type(s) == list:
+        s=np.array(s)
+    
+    n = kwargs["dim"] if "dim" in kwargs.keys() else 3
+    N = kwargs["N"] if "N" in kwargs.keys() else 30
+    
+    lims = [0 for i in range(n)] 
+    for i in range(n):
+        lims[n-i-1]=len(s[tuple([0 for j in range(i)])])
+    
+    #s = (s - min(s)) / (max(s) - min(s))
+    s = s.cumsum()
+    s = s/s[-1]
+    
+    grid = [[0 for i in range(N)] for j in range(n)]
+    exts = np.random.uniform(size=(N,))
+    for i in range(N):
+        ind = list(s>exts[i]).index(True)
+        pos = [ind for j in range(n)]
+        #print("lims: ", lims, "; ind: ", ind)
+        for j in range(n):
+            #print("j: ",j)
+            for k in range(j):
+                pos[j] //= lims[n-k-1]
+            pos[j] = pos[j] % lims[n-j-1]
+            grid[j][i] = pos[j]
+    
+    return tuple(grid)
+
 if __name__=="__main__":
     from sys import argv
     import matplotlib.pyplot as plt
-    import numpy as np
     
     with open(argv[1]) as f:
         data = [[float(i.strip()) for i in s.split(" ") if i!=""] for s in f.read().split("\n") if s!=""]
