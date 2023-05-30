@@ -21,25 +21,11 @@ void mc::polymer::init_config() {
     gen = std::mt19937(rd());
     runif = std::uniform_real_distribution<double>(0, 1);
 
-    // put first particle in a random position inside the box
-    for (int i = 0; i < DIM; ++i) {
-        x[0][i] = L * runif(gen);
-    }
-
-    for (int i = 1; i < N; ++i) {
-        // generate a random vector on unit sphere
-        double dx[DIM];
-        ranmove(dx);
-
-        // displace previous position to get new site
-        for (int j = 0; j < DIM; ++j) {
-            double x_new = x[i - 1][j] + dx[j];
-            // if it stays inside OK, else move in the other direction
-            if (0 < x_new && x_new < L) {
-                x[i][j] = x_new;
-            } else {
-                x[i][j] = x_new - 2 * dx[j];
-            }
+    // linear initialization
+    for (int i = 0; i < N; ++i) {
+        x[i][0] = 0.5 * (L + 2 * i - N);
+        for (int j = 1; j < DIM; ++j) {
+            x[i][j] = 0.5 * L;
         }
     }
 }
