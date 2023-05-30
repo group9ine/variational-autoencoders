@@ -1,9 +1,12 @@
-#include "System.h"
+#include "gamma.hpp"
+#include "polymer.hpp"
 #include <chrono>
 #include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 
 int main(int argc, const char* argv[]) {
     // print ASCII art
@@ -18,9 +21,10 @@ int main(int argc, const char* argv[]) {
     }
 
     // define variables to hold the config parameters
-    std::string prefix;
+    std::string potential;
+    std::vector<double> params;
     int n_parts, n_systems, n_steps, n_sample;
-    double side, gamma, temp, max_disp;
+    double side, temp, max_disp;
     bool print_en, show_z;
 
     // read config from file
@@ -42,14 +46,22 @@ int main(int argc, const char* argv[]) {
         std::getline(iss, value);
 
         // parse the value depending on the key
-        if (key == "prefix") {
-            prefix = value;
+        if (key == "potential") {
+            // the potential string contains also the parameters,
+            // comma-separated --> parse "value" by comma
+            std::istringstream valss(value);
+            // start by reading name
+            std::getline(valss, potential, ',');
+            // read the parameters
+            std::string par;
+            while (valss.good()) {
+                std::getline(valss, par, ',');
+                params.push_back(std::stod(par));
+            }
         } else if (key == "n_parts") {
             n_parts = std::stoi(value);
         } else if (key == "side") {
             side = std::stod(value);
-        } else if (key == "gamma") {
-            gamma = std::stod(value);
         } else if (key == "temp") {
             temp = std::stod(value);
         } else if (key == "max_disp") {
@@ -67,10 +79,24 @@ int main(int argc, const char* argv[]) {
         }
     }
 
-    if (line_cnt != 11) {
+    if (line_cnt != 10) {
         std::cout
-            << "Error in configuration file! Wrong number of parameters\n";
+            << "Error in configuration file: wrong number of parameters\n";
         return -1;
+    }
+
+    if (potential != "poly" && potential != "gamma") {
+        std::cout << "Error in configuration file: unknown potential\n";
+        return -1;
+    }
+
+    // print out info about chosen potential
+    std::cout << "Potential '" << potential << "' with ";
+    if (potential == "poly") {
+        std::cout << "k = " << params[0] << ", R_0 = " << params[1]
+                  << '\n';
+    } else if (potential == "gamma") {
+        std::cout << "gamma = " << params[0] << '\n';
     }
 
     // particles per side if they were in a cubic lattice
@@ -87,11 +113,14 @@ int main(int argc, const char* argv[]) {
     }
 
     // add config parameters to file prefixes
-    std::stringstream params;
-    params << "_" << n_parts << "_" << side << "_" << gamma << "_" << temp
-           << "_" << max_disp << "_" << n_systems << "_" << n_steps << "_"
-           << n_sample;
-    prefix += params.str();
+    std::stringstream fname_ss;
+    fname_ss << "_";
+    for (double& p : params) {
+        fname_ss << p << "_";
+    }
+    fname_ss << n_parts << "_" << side << "_" << temp << "_" << max_disp
+             << "_" << n_systems << "_" << n_steps << "_" << n_sample;
+    std::string prefix = potential + fname_ss.str();
 
     // position and energy files (in append mode to handle all the
     // different generated systems)
@@ -109,14 +138,20 @@ int main(int argc, const char* argv[]) {
     double mins_left;
 
     // start system and evolve
-    System sys(n_parts, side, gamma);
+    mc::metropolis* sys;
+    if (potential == "poly") {
+        sys = new mc::polymer(n_parts, side, params[0], params[1]);
+    } else if (potential == "gamma") {
+        sys = new mc::gamma(n_parts, side, params[0]);
+    }
+
     for (n = 0; n < n_systems; ++n) {
         begin = middle;
         middle = std::chrono::high_resolution_clock::now();
 
-        sys.init_config(); // reset positions
-        sys.evolve(n_systems, n_steps, n_sample, temp, max_disp, pos_file,
-                   ene_file, print_en, show_z);
+        sys->init_config(); // reset positions
+        sys->evolve(n_systems, n_steps, n_sample, temp, max_disp, pos_file,
+                    ene_file, print_en, show_z);
 
         // running average of elapsed time
         t_step = t_step + (end - begin - t_step) / (n + 1);
