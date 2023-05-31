@@ -56,8 +56,6 @@ double mc::polymer::potential_one(int k) const {
         }
 
         // add LJ potential
-        if (r2 > RMIN2)
-            continue;
         sr6 = 1.0 / (r2 * r2 * r2);
         pot += 1 + 4 * (sr6 * sr6 - sr6);
     }
@@ -94,8 +92,6 @@ double mc::polymer::potential_full() const {
             }
 
             // add LJ potential
-            if (r2 > RMIN2)
-                continue;
             sr6 = 1.0 / (r2 * r2 * r2);
             pot += 1 + 4 * (sr6 * sr6 - sr6);
         }
