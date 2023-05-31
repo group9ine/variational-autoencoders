@@ -3,7 +3,7 @@
 #include <cmath>
 #include <random>
 
-#define RMIN 1.122462 // minimum of LJ potential
+#define RMIN2 1.259921 // minimum of LJ potential
 #define RCUT2 6.25
 #define INF DBL_MAX
 
@@ -67,13 +67,18 @@ double mc::polymer::potential_one(int k) const {
             if (r2 > R02)
                 return INF;
             pot -= kR02 * log(1 - r2 / R02);
+            // add attractive LJ
+            if (r2 > RMIN2)
+                continue;
+            sr6 = 1.0 / (r2 * r2 * r2);
+            pot += 1 + 4 * (sr6 * sr6 - sr6);
+        } else {
+            // add full LJ
+            if (r2 > RCUT2)
+                continue;
+            sr6 = 1.0 / (r2 * r2 * r2);
+            pot += 4 * (sr6 * sr6 - sr6);
         }
-
-        // add LJ potential
-        if (r2 > RCUT2)
-            continue;
-        sr6 = 1.0 / (r2 * r2 * r2);
-        pot += 1 + 4 * (sr6 * sr6 - sr6);
     }
 
     return pot;
@@ -98,6 +103,11 @@ double mc::polymer::potential_full() const {
         if (r2 > R02)
             return INF;
         pot -= kR02 * log(1 - r2 / R02);
+        // add attractive LJ
+        if (r2 < RMIN2) {
+            sr6 = 1.0 / (r2 * r2 * r2);
+            pot += 1 + 4 * (sr6 * sr6 - sr6);
+        }
 
         // continue the loop over the following particles
         for (int j = i + 2; j < N; ++j) {
@@ -107,11 +117,11 @@ double mc::polymer::potential_full() const {
                 r2 += r * r;
             }
 
-            // add LJ potential
+            // add full LJ potential
             if (r2 > RCUT2)
                 continue;
             sr6 = 1.0 / (r2 * r2 * r2);
-            pot += 1 + 4 * (sr6 * sr6 - sr6);
+            pot += 4 * (sr6 * sr6 - sr6);
         }
     }
 
