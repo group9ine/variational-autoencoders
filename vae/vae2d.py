@@ -57,11 +57,10 @@ class VAE(keras.Model):
             name="reconstruction_loss"
         )
         self.kl_loss_tracker = keras.metrics.Mean(name="kl_loss")
-        self.l_tracker = keras.metrics.Mean(name="l")
-        self.r_tracker = keras.metrics.Mean(name="r")
-        self.l=0
-        self.r=1
-        
+        self.l_tracker = keras.metrics.Mean(name="l_t")
+        self.r_tracker = keras.metrics.Mean(name="r_t")
+        self.l = self.add_weight("l", shape=(), trainable=False, initializer=tf.keras.initializers.Constant(0.0))
+        self.r = self.add_weight("r", shape=(), trainable=False, initializer=tf.keras.initializers.Constant(1.0))
 
     @property
     def metrics(self):
@@ -101,6 +100,7 @@ class VAE(keras.Model):
             "l": self.l_tracker.result(),
             "r": self.r_tracker.result()
         }
+    
 
 if __name__=="__main__":
     from sys import argv
