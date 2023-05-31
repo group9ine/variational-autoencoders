@@ -1,11 +1,16 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -pedantic-errors -Wno-maybe-uninitialized -O3
 
-main: src/main.o src/System.o
-	${CXX} ${CXXFLAGS} src/main.o src/System.o -o main
-main.o: src/main.cpp src/System.h
+main: src/main.o src/metropolis.o src/gamma.o src/polymer.o
+	${CXX} ${CXXFLAGS} src/main.o src/metropolis.o \
+		src/gamma.o src/polymer.o -o main
+main.o: src/main.cpp src/polymer.hpp src/gamma.hpp
 	${CXX} ${CXXFLAGS} -c src/main.cpp
-System.o: src/System.cpp src/System.h
-	${CXX} ${CXXFLAGS} -c src/System.cpp
+metropolis.o: src/metropolis.cpp src/metropolis.hpp
+	${CXX} ${CXXFLAGS} -c src/metropolis.cpp
+gamma.o: src/gamma.cpp src/gamma.hpp
+	${CXX} ${CXXFLAGS} -c src/gamma.cpp
+polymer.o: src/polymer.cpp src/polymer.hpp
+	${CXX} ${CXXFLAGS} -c src/polymer.cpp
 clean:
 	rm -f src/*.o
