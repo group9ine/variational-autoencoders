@@ -27,7 +27,7 @@ void mc::metropolis::evolve(int nsysts, int nsteps, int nsample,
     dr = max_disp;
 
     nrej = 0; // reset rejection counter
-    for (int t = 0; t < nsteps; ++t) {
+    for (int t = 1; t <= nsteps; ++t) {
         step();
         if (print_energy && t % nsample == 0) {
             U = potential_full();
