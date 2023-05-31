@@ -100,9 +100,11 @@ def rand_deploy(s, *args, **kwargs):
     inds = [-1 for i in range(N)]
     for i in range(N):
         ind = list(s>exts[i]).index(True)
-        while ind in inds:
+        counter = 0
+        while ind in inds and counter < 100:
             u = np.random.uniform()
             ind = list(s>u).index(True)
+            counter += 1
         inds[i] = ind
         pos = [ind for j in range(n)]
         #print("lims: ", lims, "; ind: ", ind)

@@ -19,11 +19,11 @@ class Sampling(layers.Layer):
 latent_dim = 5
 
 encoder_inputs = keras.Input(shape=(80,80,1))
-x = layers.Conv2D(1,3, activation="relu", padding="same", use_bias=True)(encoder_inputs)
+x = layers.Conv2D(10,3, activation="relu", padding="same", use_bias=True)(encoder_inputs)
 x = layers.MaxPool2D((2,2))(x)
-x = layers.Conv2D(1,3, activation="relu", padding="same", use_bias=True)(x)
+x = layers.Conv2D(10,3, activation="relu", padding="same", use_bias=True)(x)
 x = layers.MaxPool2D((2,2))(x)
-x = layers.Conv2D(1,3, activation="relu", padding="same", use_bias=True)(x)
+x = layers.Conv2D(10,3, activation="relu", padding="same", use_bias=True)(x)
 x = layers.MaxPool2D((2,2))(x)
 x = layers.Flatten()(x)
 z_mean = layers.Dense(latent_dim, name="z_mean")(x)
@@ -33,14 +33,15 @@ encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder")
 #encoder.summary()
 
 latent_inputs = keras.Input(shape=(latent_dim,))
-x = layers.Dense(100)(latent_inputs)
-x = layers.Reshape((10,10,1))(x)
-x = layers.Conv2D(1,3, activation="relu", padding="same", use_bias=True)(x)
+x = layers.Dense(1000)(latent_inputs)
+x = layers.Reshape((10,10,10))(x)
+x = layers.Conv2DTranspose(10,3, activation="relu", padding="same", use_bias=True)(x)
 x = layers.UpSampling2D((2,2))(x)
-x = layers.Conv2D(1,3, activation="relu", padding="same", use_bias=True)(x)
+x = layers.Conv2DTranspose(10,3, activation="relu", padding="same", use_bias=True)(x)
 x = layers.UpSampling2D((2,2))(x)
-x = layers.Conv2D(1,3, activation="relu", padding="same", use_bias=True)(x)
+x = layers.Conv2DTranspose(10,3, activation="relu", padding="same", use_bias=True)(x)
 x = layers.UpSampling2D((2,2))(x)
+################# AAAAAAAAAAAAAAAAAAAAAAaaa merge layers somehow
 decoder_outputs = layers.Conv2D(1,3, activation="sigmoid", padding="same", use_bias=True)(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 #decoder.summary()
@@ -56,8 +57,11 @@ class VAE(keras.Model):
             name="reconstruction_loss"
         )
         self.kl_loss_tracker = keras.metrics.Mean(name="kl_loss")
+        self.l_tracker = keras.metrics.Mean(name="l")
+        self.r_tracker = keras.metrics.Mean(name="r")
         self.l=0
-        self.r=True
+        self.r=1
+        
 
     @property
     def metrics(self):
@@ -65,6 +69,8 @@ class VAE(keras.Model):
             self.total_loss_tracker,
             self.reconstruction_loss_tracker,
             self.kl_loss_tracker,
+            self.l_tracker,
+            self.r_tracker
         ]
 
     def train_step(self, data):
@@ -79,17 +85,21 @@ class VAE(keras.Model):
             #reconstruction_loss = tf.reduce_mean(keras.losses.mean_squared_error(data, reconstruction))
             reconstruction_loss = tf.reduce_mean(keras.losses.binary_crossentropy(data, reconstruction))
             kl_loss = -0.5 * (1 + z_log_var - tf.square(z_mean) - tf.exp(z_log_var))
-            kl_loss = tf.reduce_mean(kl_loss)
-            total_loss = reconstruction_loss + self.l*kl_loss
+            kl_loss = self.l*tf.reduce_mean(kl_loss)
+            total_loss = reconstruction_loss + kl_loss
         grads = tape.gradient(total_loss, self.trainable_weights)
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
         self.total_loss_tracker.update_state(total_loss)
         self.reconstruction_loss_tracker.update_state(reconstruction_loss)
         self.kl_loss_tracker.update_state(kl_loss)
+        self.l_tracker.update_state(self.l)
+        self.r_tracker.update_state(self.r)
         return {
             "loss": self.total_loss_tracker.result(),
             "reconstruction_loss": self.reconstruction_loss_tracker.result(),
             "kl_loss": self.kl_loss_tracker.result(),
+            "l": self.l_tracker.result(),
+            "r": self.r_tracker.result()
         }
 
 if __name__=="__main__":
