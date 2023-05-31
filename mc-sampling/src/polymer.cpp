@@ -3,8 +3,8 @@
 #include <cmath>
 #include <random>
 
-#define RMIN 1.122462 // minimum of LJ potential
-#define RMIN2 1.259921
+#define RMIN2 1.259921 // minimum of LJ potential
+#define RCUT2 6.25
 #define INF DBL_MAX
 
 mc::polymer::polymer(int npart, double side, double bond_k, double bond_l)
@@ -21,11 +21,25 @@ void mc::polymer::init_config() {
     gen = std::mt19937(rd());
     runif = std::uniform_real_distribution<double>(0, 1);
 
-    // linear initialization
-    for (int i = 0; i < N; ++i) {
-        x[i][0] = 0.5 * (L + 2 * i - N);
-        for (int j = 1; j < DIM; ++j) {
-            x[i][j] = 0.5 * L;
+    // put first particle in a random position inside the box
+    for (int i = 0; i < DIM; ++i) {
+        x[0][i] = L * runif(gen);
+    }
+
+    for (int i = 1; i < N; ++i) {
+        // generate a random vector on unit sphere
+        double dx[DIM];
+        ranmove(dx);
+
+        // displace previous position to get new site
+        for (int j = 0; j < DIM; ++j) {
+            double x_new = x[i - 1][j] + dx[j];
+            // if it stays inside OK, else move in the other direction
+            if (0 < x_new && x_new < L) {
+                x[i][j] = x_new;
+            } else {
+                x[i][j] = x_new - 2 * dx[j];
+            }
         }
     }
 }
@@ -53,11 +67,18 @@ double mc::polymer::potential_one(int k) const {
             if (r2 > R02)
                 return INF;
             pot -= kR02 * log(1 - r2 / R02);
+            // add attractive LJ
+            if (r2 > RMIN2)
+                continue;
+            sr6 = 1.0 / (r2 * r2 * r2);
+            pot += 1 + 4 * (sr6 * sr6 - sr6);
+        } else {
+            // add full LJ
+            if (r2 > RCUT2)
+                continue;
+            sr6 = 1.0 / (r2 * r2 * r2);
+            pot += 4 * (sr6 * sr6 - sr6);
         }
-
-        // add LJ potential
-        sr6 = 1.0 / (r2 * r2 * r2);
-        pot += 1 + 4 * (sr6 * sr6 - sr6);
     }
 
     return pot;
@@ -82,6 +103,11 @@ double mc::polymer::potential_full() const {
         if (r2 > R02)
             return INF;
         pot -= kR02 * log(1 - r2 / R02);
+        // add attractive LJ
+        if (r2 < RMIN2) {
+            sr6 = 1.0 / (r2 * r2 * r2);
+            pot += 1 + 4 * (sr6 * sr6 - sr6);
+        }
 
         // continue the loop over the following particles
         for (int j = i + 2; j < N; ++j) {
@@ -91,9 +117,11 @@ double mc::polymer::potential_full() const {
                 r2 += r * r;
             }
 
-            // add LJ potential
+            // add full LJ potential
+            if (r2 > RCUT2)
+                continue;
             sr6 = 1.0 / (r2 * r2 * r2);
-            pot += 1 + 4 * (sr6 * sr6 - sr6);
+            pot += 4 * (sr6 * sr6 - sr6);
         }
     }
 
