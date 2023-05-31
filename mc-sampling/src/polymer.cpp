@@ -4,7 +4,7 @@
 #include <random>
 
 #define RMIN 1.122462 // minimum of LJ potential
-#define RMIN2 1.259921
+#define RCUT2 6.25
 #define INF DBL_MAX
 
 mc::polymer::polymer(int npart, double side, double bond_k, double bond_l)
@@ -70,7 +70,7 @@ double mc::polymer::potential_one(int k) const {
         }
 
         // add LJ potential
-        if (r2 > RMIN2)
+        if (r2 > RCUT2)
             continue;
         sr6 = 1.0 / (r2 * r2 * r2);
         pot += 1 + 4 * (sr6 * sr6 - sr6);
@@ -108,7 +108,7 @@ double mc::polymer::potential_full() const {
             }
 
             // add LJ potential
-            if (r2 > RMIN2)
+            if (r2 > RCUT2)
                 continue;
             sr6 = 1.0 / (r2 * r2 * r2);
             pot += 1 + 4 * (sr6 * sr6 - sr6);
