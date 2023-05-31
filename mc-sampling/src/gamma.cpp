@@ -1,7 +1,6 @@
 #include "gamma.hpp"
 
-#define RCUT 2.5
-#define RCUT2 6.25
+#define RCUT2 9.0
 
 mc::gamma::gamma(int npart, double side, double gam)
     : mc::metropolis(npart, side), g(gam) {}
@@ -68,7 +67,7 @@ double mc::gamma::potential_full() const {
                 r2 += r * r;
             }
 
-            if (r2 > RCUT2)
+            if (r2 < RCUT2)
                 continue;
 
             sr6 = 1.0 / (r2 * r2 * r2);
