@@ -4,7 +4,7 @@
 #include <random>
 
 #define RMIN2 1.259921 // minimum of LJ potential
-#define RCUT2 6.25
+#define RCUT2 9.0
 #define INF DBL_MAX
 
 mc::polymer::polymer(int npart, double side, double bond_k, double bond_l)
