@@ -67,7 +67,7 @@ double mc::gamma::potential_full() const {
                 r2 += r * r;
             }
 
-            if (r2 < RCUT2)
+            if (r2 > RCUT2)
                 continue;
 
             sr6 = 1.0 / (r2 * r2 * r2);
