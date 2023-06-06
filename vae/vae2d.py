@@ -16,7 +16,7 @@ class Sampling(layers.Layer):
 
 
 
-latent_dim = 5
+latent_dim = 20
 
 encoder_inputs = keras.Input(shape=(80,80,1))
 x = layers.Conv2D(10,3, activation="relu", padding="same", use_bias=True)(encoder_inputs)
@@ -41,7 +41,7 @@ x = layers.Conv2DTranspose(10,3, activation="relu", padding="same", use_bias=Tru
 x = layers.UpSampling2D((2,2))(x)
 x = layers.Conv2DTranspose(10,3, activation="relu", padding="same", use_bias=True)(x)
 x = layers.UpSampling2D((2,2))(x)
-################# AAAAAAAAAAAAAAAAAAAAAAaaa merge layers somehow
+
 decoder_outputs = layers.Conv2D(1,3, activation="sigmoid", padding="same", use_bias=True)(x)
 decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 #decoder.summary()
