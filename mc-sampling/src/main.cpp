@@ -1,3 +1,4 @@
+#include "fake.hpp"
 #include "gamma.hpp"
 #include "polymer.hpp"
 #include <chrono>
@@ -85,7 +86,7 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
-    if (potential != "poly" && potential != "gamma") {
+    if (potential != "poly" && potential != "gamma" && potential != "fake") {
         std::cout << "Error in configuration file: unknown potential\n";
         return -1;
     }
@@ -97,6 +98,9 @@ int main(int argc, const char* argv[]) {
                   << '\n';
     } else if (potential == "gamma") {
         std::cout << "gamma = " << params[0] << '\n';
+    } else if (potential == "fake") {
+        std::cout << "p = " << int(params[0]) << ", gamma = "
+                  << params[1] << '\n';
     }
 
     // particles per side if they were in a cubic lattice
@@ -143,6 +147,8 @@ int main(int argc, const char* argv[]) {
         sys = new mc::polymer(n_parts, side, params[0], params[1]);
     } else if (potential == "gamma") {
         sys = new mc::gamma(n_parts, side, params[0]);
+    } else if (potential == "fake") {
+        sys = new mc::fake(n_parts, side, int(params[0]), params[1]);
     }
 
     for (n = 0; n < n_systems; ++n) {
