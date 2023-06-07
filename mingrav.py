@@ -16,7 +16,7 @@ def find_best_params(points):
     
     # going in decreasing distance order, check if each successive point is
     ##  within the poligon with the currently selected point as vertices
-    for p in centered_points:
+    for p in centered_points[3:]:
         # to find if it's within the polygon, check the halfplane given by the two closest
         p1,p2 = [pi+p for pi in sorted(selected_points-p, key=lambda x: x[0]**2 + x[1]**2)[:2]]
         norm = np.array([p1[1]-p2[1], p2[0]-p1[0]])
@@ -34,6 +34,7 @@ def find_best_params(points):
         p2 = selected_points[i-1]
         
         norm = np.array([p1[1]-p2[1], p2[0]-p1[0]])
+        #print((norm[0]**2+norm[1]**2)**0.5, p1, p2, selected_points)
         norm /= (norm[0]**2+norm[1]**2)**0.5
         centr = (p1+p2)/2
         dists[i] = np.dot(-centr, norm)
