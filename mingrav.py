@@ -28,7 +28,7 @@ def find_best_params(points):
                 p3=selected_points[i]
                 break
         
-        print(p, p1, p2, sign(np.dot(p-centr,norm)), sign(np.dot(-centr, norm)))
+        #print(p, p1, p2, sign(np.dot(p-centr,norm)), sign(np.dot(-centr, norm)))
         if not (sign(np.dot(p-centr,norm)) == sign(np.dot(p3-centr, norm)) or sign(np.dot(p-centr, norm)) == 0):
             # if not in poligon, select the point
             selected_points.append(p)
