@@ -46,10 +46,18 @@ def find_best_params(points):
     p2 = selected_points[i-1]
     norm = np.array([p1[1]-p2[1], p2[0]-p1[0]])
     
-    theta = np.arctan2(norm[1], norm[0])
+    theta = np.arctan2(norm[1], norm[0]) + np.pi/2
     rot_mat = np.array([[np.cos(theta), np.sin(theta)],[-np.sin(theta), np.cos(theta)]])
     
     centered_points = centered_points@rot_mat
     # shift in place
     centered_points -= centered_points.min(axis=0)
     return centered_points
+
+if __name__=="__main__":
+    import matplotlib.pyplot as plt
+    points = np.array([[0,0],[0,1],[1,0],[1,1],[0,2],[1,2],[1,1.5],[1,0.5]])
+    plt.scatter([i[0] for i in points],[i[1] for i in points])
+    new = find_best_params(points)
+    plt.scatter([i[0] for i in new],[i[1] for i in new])
+    plt.show()
