@@ -42,8 +42,9 @@ double mc::fake::potential_one(int k) const {
             if (r2 > RCUT2)
                 continue;
 
+            srp = r2;
             for (int m = 0; m < p; ++m) {
-                srp *= srp; // get r to the power of p
+                srp *= r2; // get r to the power of p
             }
             srp = 1.0 / srp;
             pot += 4 * (srp * srp - srp);
@@ -73,8 +74,9 @@ double mc::fake::potential_full() const {
             if (r2 > RCUT2)
                 continue;
 
+            srp = r2;
             for (int m = 0; m < p; ++m) {
-                srp *= srp; // get r to the power of p
+                srp *= r2; // get r to the power of p
             }
             srp = 1.0 / srp;
             pot += 4 * (srp * srp - srp);
