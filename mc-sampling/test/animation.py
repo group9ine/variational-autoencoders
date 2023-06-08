@@ -44,7 +44,7 @@ def animate_2d(fname, nframes):
 
     # create the animation
     animation = FuncAnimation(
-        fig, update, frames=int(nframes), interval=100
+        fig, update, frames=int(nframes), interval=50
     )
 
     # save the animation in fname(-".x").gif
