@@ -54,7 +54,7 @@ def find_best_params(points):
     norm = np.array([p1[1]-p2[1], p2[0]-p1[0]])
     #print(p1, p2)
     
-    theta = np.arctan2(norm[1], norm[0])
+    theta = np.pi- np.arctan2(norm[1], norm[0])
     rot_mat = np.array([[np.cos(theta), np.sin(theta)],[-np.sin(theta), np.cos(theta)]])
     
     centered_points = centered_points@rot_mat
@@ -67,7 +67,12 @@ def find_best_params(points):
 if __name__=="__main__":
     points = np.array([[0,0],[0,1],[1,0],[1,1],[0,2],[1,2],[0.9,1.7],[0.9,0.7]])
     points += np.random.normal(0,0.05, size=points.shape)
+    
     plt.scatter([i[0] for i in points],[i[1] for i in points], c="red")
+    
+    alpha=1
+    points=points@np.array([[np.cos(alpha), np.sin(alpha)],[-np.sin(alpha), np.cos(alpha)]])
+    
     new, sel = find_best_params(points)
     plt.scatter([i[0] for i in new],[i[1] for i in new], c="blue")
     plt.scatter([i[0] for i in sel],[i[1] for i in sel], c="orange")
