@@ -1,6 +1,6 @@
 # WAHriational Autoencoders
 ## Main Notebook
-The most comprehensive notebook is `VAE-Training.ipynb`
+The most comprehensive notebook is `vae/vae-training.ipynb`.
 
 ## Info on the scripts
 Run `format_all` to perform *cosmetic edits* on all python files in the
