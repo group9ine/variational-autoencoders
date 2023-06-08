@@ -1,4 +1,4 @@
-# Variational Autoencoders for Lennard-Jones Configurations
+# Variational Autoencoders for Lennard-Jones-like Configurations
 ## Main Notebook
 The most comprehensive notebook is `vae/vae-training.ipynb`.
 
