@@ -30,6 +30,11 @@ int main(int argc, const char* argv[]) {
 
     // read config from file
     std::ifstream cfg(argv[1]);
+    if (!cfg.good()) {
+        std::cout << "Configuration file not found!\n";
+        return -1;
+    }
+
     std::string line;
     int line_cnt = 0;
     while (std::getline(cfg, line)) {
@@ -86,7 +91,8 @@ int main(int argc, const char* argv[]) {
         return -1;
     }
 
-    if (potential != "poly" && potential != "gamma" && potential != "fake") {
+    if (potential != "poly" && potential != "gamma"
+        && potential != "fake") {
         std::cout << "Error in configuration file: unknown potential\n";
         return -1;
     }
@@ -99,8 +105,8 @@ int main(int argc, const char* argv[]) {
     } else if (potential == "gamma") {
         std::cout << "gamma = " << params[0] << '\n';
     } else if (potential == "fake") {
-        std::cout << "p = " << int(params[0]) << ", gamma = "
-                  << params[1] << '\n';
+        std::cout << "p = " << int(params[0]) << ", gamma = " << params[1]
+                  << '\n';
     }
 
     // particles per side if they were in a cubic lattice

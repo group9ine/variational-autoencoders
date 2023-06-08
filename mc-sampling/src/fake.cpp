@@ -6,7 +6,7 @@ mc::fake::fake(int npart, double side, int power, double gam)
     : mc::metropolis(npart, side), p(power), g(gam) {}
 
 mc::fake::~fake() {
-    // destruction of x is performed in base class 
+    // destruction of x is performed in base class
 }
 
 void mc::fake::init_config() {
