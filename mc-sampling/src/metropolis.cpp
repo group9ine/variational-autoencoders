@@ -29,9 +29,11 @@ void mc::metropolis::evolve(int nsysts, int nsteps, int nsample,
     nrej = 0; // reset rejection counter
     for (int t = 1; t <= nsteps; ++t) {
         step();
-        if (print_energy && t % nsample == 0) {
-            U = potential_full();
-            print_ene(ene_file);
+        if (t % nsample == 0) {
+            if (print_energy) {
+                U = potential_full();
+                print_ene(ene_file);
+            }
 
             if (nsysts == 1) {       // print position every nsample
                 print_pos(pos_file); // only if there is only one system
