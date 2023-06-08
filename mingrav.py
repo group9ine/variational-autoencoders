@@ -1,4 +1,4 @@
- 
+import matplotlib.pyplot as plt
 import numpy as np
 def find_best_params(points):
     centered_points = points - np.mean(points, axis=0)
@@ -22,7 +22,14 @@ def find_best_params(points):
         norm = np.array([p1[1]-p2[1], p2[0]-p1[0]])
         centr = (p1+p2)/2
         
-        if not sign(np.dot(p-centr,norm)) == sign(np.dot(-centr, norm)):
+        p3 = None
+        for i in range(len(selected_points)):
+            if not ((selected_points[i][0] == p1[0] and selected_points[i][1] == p1[1]) or (selected_points[i][0] == p2[0] and selected_points[i][1] == p2[1])):
+                p3=selected_points[i]
+                break
+        
+        print(p, p1, p2, sign(np.dot(p-centr,norm)), sign(np.dot(-centr, norm)))
+        if not (sign(np.dot(p-centr,norm)) == sign(np.dot(p3-centr, norm)) or sign(np.dot(p-centr, norm)) == 0):
             # if not in poligon, select the point
             selected_points.append(p)
             
@@ -51,14 +58,17 @@ def find_best_params(points):
     rot_mat = np.array([[np.cos(theta), np.sin(theta)],[-np.sin(theta), np.cos(theta)]])
     
     centered_points = centered_points@rot_mat
+    selected_points = np.array(selected_points)@rot_mat
     # shift in place
+    selected_points -= centered_points.min(axis=0)
     centered_points -= centered_points.min(axis=0)
-    return centered_points
+    return centered_points, selected_points
 
 if __name__=="__main__":
-    import matplotlib.pyplot as plt
     points = np.array([[0,0],[0,1],[1,0],[1,1],[0,2],[1,2],[0.9,1.7],[0.9,0.7]])
-    plt.scatter([i[0] for i in points],[i[1] for i in points])
-    new = find_best_params(points)
-    plt.scatter([i[0] for i in new],[i[1] for i in new])
+    points += np.random.normal(0,0.05, size=points.shape)
+    plt.scatter([i[0] for i in points],[i[1] for i in points], c="red")
+    new, sel = find_best_params(points)
+    plt.scatter([i[0] for i in new],[i[1] for i in new], c="blue")
+    plt.scatter([i[0] for i in sel],[i[1] for i in sel], c="orange")
     plt.show()
