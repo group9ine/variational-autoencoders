@@ -1,12 +1,10 @@
 #include "fake.hpp"
 
-#define RCUT2 9.0
-
 mc::fake::fake(int npart, double side, int power, double gam)
     : mc::metropolis(npart, side), p(power), g(gam) {}
 
 mc::fake::~fake() {
-    // destruction of x is performed in base class 
+    // destruction of x is performed in base class
 }
 
 void mc::fake::init_config() {
@@ -39,9 +37,6 @@ double mc::fake::potential_one(int k) const {
                 r2 += r * r;
             }
 
-            if (r2 > RCUT2)
-                continue;
-
             srp = r2;
             for (int m = 0; m < p; ++m) {
                 srp *= r2; // get r to the power of p
@@ -70,9 +65,6 @@ double mc::fake::potential_full() const {
                 r = x[i][k] - x[j][k];
                 r2 += r * r;
             }
-
-            if (r2 > RCUT2)
-                continue;
 
             srp = r2;
             for (int m = 0; m < p; ++m) {

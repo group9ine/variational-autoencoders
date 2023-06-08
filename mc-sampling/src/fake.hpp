@@ -7,7 +7,7 @@ namespace mc {
 class fake : public metropolis {
 public:
     fake(int npart, double side, int power, double gam);
-    
+
     // delete copy constructor and assignment operator
     fake(const fake& x) = delete;
     fake& operator=(const fake& x) = delete;
