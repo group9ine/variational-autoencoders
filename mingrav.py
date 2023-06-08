@@ -42,11 +42,12 @@ def find_best_params(points):
     c_ind = dists.index(min(dists)) # index of closest segment
     
     # turn points so that segment faces down
-    p1 = selected_points[i]
-    p2 = selected_points[i-1]
+    p1 = selected_points[c_ind]
+    p2 = selected_points[c_ind-1]
     norm = np.array([p1[1]-p2[1], p2[0]-p1[0]])
+    #print(p1, p2)
     
-    theta = np.arctan2(norm[1], norm[0]) + np.pi/2
+    theta = np.arctan2(norm[1], norm[0])
     rot_mat = np.array([[np.cos(theta), np.sin(theta)],[-np.sin(theta), np.cos(theta)]])
     
     centered_points = centered_points@rot_mat
@@ -56,7 +57,7 @@ def find_best_params(points):
 
 if __name__=="__main__":
     import matplotlib.pyplot as plt
-    points = np.array([[0,0],[0,1],[1,0],[1,1],[0,2],[1,2],[1,1.5],[1,0.5]])
+    points = np.array([[0,0],[0,1],[1,0],[1,1],[0,2],[1,2],[0.9,1.7],[0.9,0.7]])
     plt.scatter([i[0] for i in points],[i[1] for i in points])
     new = find_best_params(points)
     plt.scatter([i[0] for i in new],[i[1] for i in new])
