@@ -1,5 +1,5 @@
 # Variational Autoencoders for Lennard-Jones-like Configurations
-## Main Notebook
+## Main notebook
 The most comprehensive notebook is `vae/vae-training.ipynb`.
 
 ## Info on the scripts
