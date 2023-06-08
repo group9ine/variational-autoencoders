@@ -12,6 +12,8 @@ def animate_2d(fname, nframes):
         pot_pars = 2
     elif params[0].endswith("gamma"):
         pot_pars = 1
+    elif params[0].endswith("fake"):
+        pot_pars = 2
     else:
         print("Error: filename begins with unknown potential identifier.")
         return
