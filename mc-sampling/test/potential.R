@@ -1,16 +1,15 @@
 library(tibble)
 library(ggplot2)
 theme_set(theme_minimal(
-    base_size = 20, base_family = "Fira Sans Condensed"
+    base_size = 32, base_family = "Fira Sans Condensed"
 ))
-pal <- RColorBrewer::brewer.pal(3, "Dark2")
 
 fname <- list.files(
     path = "../dump", pattern = "*_U.txt", full.names = TRUE
 )
 
 potential <- scan(file = fname) |>
-    matrix(nrow = 1000, ncol = 500, byrow = TRUE)
+    matrix(nrow = 100, ncol = 500, byrow = TRUE)
 
 idx <- 30
 tibble(iter = seq_along(potential[idx, ]), pot = potential[idx, ]) |>
@@ -23,6 +22,6 @@ tibble(iter = seq_along(potential[idx, ]), pot = potential[idx, ]) |>
         )
 
 ggsave(
-    filename = "decorrelation.png", device = "png",
-    dpi = 600, width = 9, height = 5
+    filename = "img/decorrelation.png", device = "png",
+    dpi = 300, width = 9, height = 6, bg = "#f6f6f6"
 )
