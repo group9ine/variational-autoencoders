@@ -19,18 +19,19 @@ pal <- c("#90a955", "#4f772d", "#31572c", "#132a13")
 
 for (i in seq_along(gammas)) {
     plt <- tibble(
-        x = data[[i]][idx, seq(1, 60, 2)],
-        y = data[[i]][idx, seq(2, 60, 2)]
+        x = data[[i]][idx, seq(1, 60, 2)] / 10,
+        y = data[[i]][idx, seq(2, 60, 2)] / 10
     ) |>
         ggplot(aes(x, y)) +
             geom_point(size = 5, colour = pal[i]) +
             labs(
                 x = "x / L", y = "y / L",
                 title = paste("Sampling with γ =", gammas[i])
-            )
+            ) +
+            coord_cartesian(xlim = c(0, 1), ylim = c(0, 1), expand = FALSE)
 
     ggsave(
-        paste0("gamma_", gammas[i], "_conf.png"), plot = plt,
+        paste0("img/gamma_", gammas[i], "_conf.png"), plot = plt,
         device = "png", dpi = 600, width = 8, height = 8,
     )
 }
