@@ -12,7 +12,7 @@ fname <- list.files(
 potential <- scan(file = fname) |>
     matrix(nrow = 1000, ncol = 500, byrow = TRUE)
 
-idx <- 70
+idx <- 30
 tibble(iter = seq_along(potential[idx, ]), pot = potential[idx, ]) |>
     ggplot(aes(x = iter, y = pot)) +
         geom_point(size = 1, colour = "firebrick") +
