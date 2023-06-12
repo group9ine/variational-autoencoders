@@ -1,6 +1,6 @@
 library(tidyverse)
 theme_set(theme_minimal(
-    base_size = 20, base_family = "Fira Sans Condensed"
+    base_size = 32, base_family = "Fira Sans Condensed"
 ))
 
 fnames <- list.files(
@@ -23,7 +23,7 @@ for (i in seq_along(gammas)) {
         y = data[[i]][idx, seq(2, 60, 2)] / 10
     ) |>
         ggplot(aes(x, y)) +
-            geom_point(size = 5, colour = pal[i]) +
+            geom_point(size = 8, colour = pal[i]) +
             labs(
                 x = "x / L", y = "y / L",
                 title = paste("Sampling with γ =", gammas[i])
@@ -32,6 +32,6 @@ for (i in seq_along(gammas)) {
 
     ggsave(
         paste0("img/gamma_", gammas[i], "_conf.png"), plot = plt,
-        device = "png", dpi = 600, width = 8, height = 8,
+        device = "png", dpi = 300, width = 7, height = 7,
     )
 }
