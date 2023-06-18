@@ -49,21 +49,21 @@ def find_best_params(points):
             selected_points = sorted(
                 selected_points, key=lambda x: np.arctan2(x[1], x[0])
             )
-    
+
     while True:
         for i in range(len(selected_points)):
-            p3=selected_points[i]
-            p2=selected_points[i-1]
-            p1=selected_points[i-2]
-            
+            p3 = selected_points[i]
+            p2 = selected_points[i - 1]
+            p1 = selected_points[i - 2]
+
             norm = np.array([p1[1] - p3[1], p3[0] - p1[0]])
             centr = (p1 + p3) / 2
             if sign(np.dot(p2 - centr, norm)) > 0:
                 break
         else:
             break
-        del selected_points[i-1]
-    
+        del selected_points[i - 1]
+
     # find the polygon segment that is closer to the center
     # selected_points = sorted(selected_points, key=lambda x: np.arctan2(x[1], x[0]))
     dists = [0 for i in range(len(selected_points))]
